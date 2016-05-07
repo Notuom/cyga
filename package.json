@@ -1,0 +1,19 @@
+{
+  "name": "log515-cyga",
+  "version": "0.0.1",
+  "description": "CYGA - Can You Guess The Acronym - web-based multiplayer acronym game",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LOG515 E2016 EQ11",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4",
+    "socket.io": "^1.4.6"
+  },
+  "jshintConfig": {
+    "esversion": 6
+  }
+}

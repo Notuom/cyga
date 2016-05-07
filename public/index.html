@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>CYGA</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css" media="screen" charset="utf-8">
+  <link rel="stylesheet" href="css/main.css" media="screen" charset="utf-8">
+</head>
+
+<body>
+  <div class="container">
+    <h1><abbr title="Can You Guess the Acronym">CYGA</abbr></h1>
+
+    <!-- Formulaire de connexion -->
+    <form action="/" method="post" id="connexion-form" class="form panneau">
+      <div class="row">
+        <div class="col-sm-6">
+          <input type="text" id="connexion-username" name="username" placeholder="Entrez un pseudonyme..." class="form-control">
+        </div>
+        <div class="col-sm-6">
+          <button type="submit" id="connexion-submit" name="connexion-submit" class="btn btn-primary">
+            <i class="glyphicon glyphicon-user"></i> Commencer une session
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Formulaire pour créer ou rejoindre une salle -->
+    <form action="/" method="post" id="salle-joindre-form" class="form panneau" hidden>
+      <h2>Rejoindre une salle</h2>
+      <div class="row">
+        <div class="col-sm-6">
+          <input type="text" maxlength="4" id="salle-joindre-code" name="salle-joindre-code" placeholder="Code de 4 caractères" class="form-control">
+        </div>
+        <div class="col-sm-6">
+          <button type="submit" id="salle-joindre-submit" name="salle-joindre-submit" class="btn btn-primary"><i class="glyphicon glyphicon-arrow-right
+"></i> Joindre la salle</button>
+        </div>
+      </div>
+      <h2>Créer une salle</h2>
+      <button type="button" id="salle-creer" name="salle-creer" class="btn btn-success"><i class="glyphicon glyphicon-plus
+"></i> Créer une nouvelle partie</button>
+    </form>
+
+    <!-- Tableau de bord pour l'attente du début de la partie -->
+    <form action="/" method="post" id="salle-attente-form" class="form panneau" hidden>
+      <h2>Salle <span id="code-salle">{{code}}</span></h2>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Utilisateurs</th>
+          </tr>
+        </thead>
+        <tbody id="salle-attente-utilisateurs"></tbody>
+      </table>
+
+      <button type="button" id="salle-attente-go" name="salle-attente-go" class="btn btn-primary" hidden>
+        <i class="glyphicon glyphicon-ok"></i> Débuter la partie
+      </button>
+    </form>
+
+    <!-- Panneau affiché lors de la déconnexion -->
+    <div id="deconnexion-panel" class="panel panel-danger" hidden>
+      <div class="panel-heading">
+        <h3>Déconnexion</h3>
+      </div>
+      <div class="panel-body">
+        Vous avez été déconnecté du serveur. Pour recommencer, veuillez rafraîchir la page ou <a href="/">cliquer ici</a>.
+      </div>
+    </div>
+  </div>
+
+  <script src="js/jquery-2.2.3.min.js" charset="utf-8"></script>
+  <script src="js/bootstrap.min.js" charset="utf-8"></script>
+  <script src="js/socket.io.js" charset="utf-8"></script>
+  <script src="js/main.js" charset="utf-8"></script>
+</body>
+
+</html>
