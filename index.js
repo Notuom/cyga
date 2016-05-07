@@ -1,4 +1,4 @@
-var port = 8080;
+var port = process.env.PORT || 8080;
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
