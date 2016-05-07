@@ -130,6 +130,8 @@ io.on('connection', function(socket) {
 
   // L'utilisateur rejoint une salle existante
   socket.on('salle joindre demande', function(code) {
+    code = code.toUpperCase();
+
     // Salle existe
     if (code in salles) {
 

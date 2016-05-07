@@ -60,15 +60,17 @@ $(function () {
 
   // Le serveur accepte la création de salle, afficher le dashboard avec le code
   socket.on("salle attente initialisation", function(data) {
-    console.info('"salle attente initialisation" reçu');
+    console.info('"salle attente initialisation" reçu avec code=', data.code, ', admin=', data.admin);
     $(".panneau").hide();
     $("#salle-attente-form").show();
 
     $("#code-salle").text(data.code);
     rafraichirUtilisateurs(data.utilisateurs);
 
-    if (data.admin) {
+    if (data.admin === true) {
       $("#salle-attente-go").show();
+    } else {
+      $("#salle-attente-go").hide();
     }
   });
 
