@@ -66,12 +66,6 @@ function salleExiste(code) {
   return false;
 }
 
-// Enlever l'utilisateur de la liste et de la salle
-function supprimerUtilisateur(salle, username) {
-  utilisateurs.splice(utilisateurs.indexOf(username), 1);
-  salle.utilisateurs.splice(salle.utilisateurs.indexOf(username), 1);
-}
-
 //
 // WebSockets
 //
@@ -167,14 +161,17 @@ io.on('connection', function(socket) {
   // Déconnexion de l'utilisateur (géré automatiquement par cocket.io)
   socket.on('disconnect', function() {
     console.log('Déconnexion pour username=' + socket.username);
-    if (socket.username !== false && "salle" in socket) {
-      supprimerUtilisateur(socket.salle, socket.username);
-      console.log("Utilisateurs", utilisateurs);
+    if (socket.username !== false) {
+      utilisateurs.splice(utilisateurs.indexOf(socket.username), 1);
+      if ("salle" in socket) {
+        salle.utilisateurs.splice(salle.utilisateurs.indexOf(socket.username), 1);
+        console.log("Utilisateurs", utilisateurs);
 
-      if (socket.salle.utilisateurs.length === 0) {
-        console.log("Dernier utilisateur de la salle code=" + socket.codeSalle + ". Suppression de la salle.");
-        delete salles[socket.codeSalle];
-        console.log(salles);
+        if (socket.salle.utilisateurs.length === 0) {
+          console.log("Dernier utilisateur de la salle code=" + socket.codeSalle + ". Suppression de la salle.");
+          delete salles[socket.codeSalle];
+          console.log(salles);
+        }
       }
     }
   });
