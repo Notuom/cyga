@@ -1,176 +1,122 @@
+// Bootstrapping
+global.__base = __dirname + '/app/';
 var port = process.env.PORT || 8080;
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
+// Game classes
+var GameManager = require(__base + 'game/GameManager');
+var Room = require(__base + 'game/Room');
+
+var game = new GameManager();
+
 //
-// Pages statiques
+// Static HTTP server
 //
-server.listen(port, function() {
-  console.log('Le serveur ecoute sur le port %d', port);
+server.listen(port, function () {
+  console.log('Server listening on port %d', port);
 });
 app.use(express.static(__dirname + '/public'));
 
 //
-// Gestion des utilisateurs
+// WebSockets server
 //
-var utilisateurs = [];
-
-// Vérifier si un nom d'utilisateur existe déjà dans la liste
-function utilisateurExiste(username) {
-  return utilisateurs.indexOf(username) !== -1;
-}
-
-// Ajouter un utilisateur à la liste d'utilisateurs
-function ajouterUtilisateur(username) {
-  utilisateurs.push(username);
-}
-
-//
-// Gestion des salles
-//
-var SALLE_STATUT_ATTENTE = 0;
-var SALLE_STATUT_ACTIF = 1;
-var salles = {};
-
-// Constructeur de Salle ("classe")
-function Salle(code) {
-  this.statut = SALLE_STATUT_ATTENTE;
-  this.code = code;
-  this.utilisateurs = [];
-}
-
-// Ajouter un utilisateur à la salle
-Salle.prototype.ajouterUtilisateur = function(username) {
-  this.utilisateurs.push(username);
-};
-
-// Ajouter une salle à la liste
-function ajouterSalle(salle) {
-  salles[salle.code] = salle;
-}
-
-// Supprimer une salle par code
-function supprimerSalle(code) {
-  delete salles[code];
-}
-
-// Vérifier si une salle existe
-function salleExiste(code) {
-  for (var i = 0; i < salles.length; i++) {
-    if (salles[i].code === code) {
-      return true;
-    }
-  }
-  return false;
-}
-
-//
-// WebSockets
-//
-io.on('connection', function(socket) {
-
-  // L'utilisateur est-il enregistré par son username?
+io.on('connection', function (socket) {
   socket.username = false;
   socket.admin = false;
-  var utilisateurEnregistre = false;
 
-  // L'utilisateur s'enregistre (entre son nom d'utilisateur)
-  socket.on('utilisateur connexion demande', function(username) {
-    console.log('"utilisateur connexion demande" reçu avec username=' + username);
-    if (!utilisateurExiste(username)) {
-      ajouterUtilisateur(username);
+  // Register player
+  socket.on('user_connection_request', function (username) {
+    console.log('"user_connection_request" received with username=' + username);
+    if (!game.playerExists(username)) {
+      game.addPlayer(username);
       socket.username = username;
-      socket.emit('utilisateur connexion succes');
-      console.log("Utilisateur ajouté.");
+      socket.emit('user_connection_success');
     } else {
-      socket.emit('utilisateur connexion erreur', "Le nom d'utilisateur est déjà pris.");
-      console.log("Utilisateur rejeté.");
+      socket.emit('user_connection_error', "Username is already taken.");
+      console.log("User rejected (username already exists).");
     }
   });
 
-  // L'utilisateur créé une nouvelle salle
-  socket.on('salle creer demande', function() {
-    console.log('"salle creer demande" reçu');
+  // Create new room
+  socket.on('room_create_request', function () {
+    console.log('"room_create_request" received');
 
-    // Générer un code alphanumérique de 4 caractères qui n'existe pas déjà
-    var caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890";
-    var code;
-    do {
-      code = "";
-      for (var i = 0; i < 4; i++) {
-        code += car = caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-      }
-    } while (salleExiste(code));
-
-    var salle = new Salle(code);
-    salle.ajouterUtilisateur(socket.username);
-    ajouterSalle(salle);
-    console.log('Salle créée avec code=' + code);
-    console.log(salles);
+    var room = game.createRoom();
+    room.addPlayer(socket.username);
 
     socket.admin = true;
-    socket.codeSalle = code;
-    socket.salle = salle;
-    socket.join(code);
+    socket.room = room;
+    socket.join(room.code);
 
-    socket.emit("salle attente initialisation", {
+    socket.emit("room_waiting_init", {
       admin: true,
-      code: salle.code,
-      utilisateurs: salle.utilisateurs
+      code: room.code,
+      players: room.players
     });
   });
 
-  // L'utilisateur rejoint une salle existante
-  socket.on('salle joindre demande', function(code) {
+  // Join room
+  socket.on('room_join_request', function (code) {
     code = code.toUpperCase();
 
-    // Salle existe
-    if (code in salles) {
+    // Room exists
+    if (code in game.rooms) {
 
-      // Salle est en attente
-      if (salles[code].statut === SALLE_STATUT_ATTENTE) {
+      // Room is waiting
+      if (game.rooms[code].status === Room.STATUS_WAITING) {
         socket.admin = false;
-        socket.codeSalle = code;
-        socket.salle = salles[code];
-        socket.salle.ajouterUtilisateur(socket.username);
+        socket.room = game.rooms[code];
+        socket.room.addPlayer(socket.username);
         socket.join(code);
 
-        socket.emit("salle attente initialisation", {
+        socket.emit("room_waiting_init", {
           admin: false,
           code: code,
-          utilisateurs: socket.salle.utilisateurs
+          players: socket.room.players
         });
 
-        socket.to(code).emit("salle attente update", socket.salle.utilisateurs);
+        socket.to(code).emit("room_waiting_update", socket.room.players);
       }
 
-      // Salle est commencée
+      // Room is started
       else {
-        socket.emit("salle attente erreur", "La partie est déjà commencée!");
+        socket.emit("room_waiting_error", "The game is already started!");
       }
     }
 
-    // Salle n'existe pas
+    // Room does not exist
     else {
-      socket.emit("salle attente erreur", "La partie n'existe pas.");
+      socket.emit("room_waiting_error", "The room does not exist.");
     }
   });
 
-  // Déconnexion de l'utilisateur (géré automatiquement par cocket.io)
-  socket.on('disconnect', function() {
-    console.log('Déconnexion pour username=' + socket.username);
+  // Disconnect (managed by socket.io)
+  socket.on('disconnect', function () {
+    console.log('Déconnection pour username=' + socket.username);
     if (socket.username !== false) {
-      utilisateurs.splice(utilisateurs.indexOf(socket.username), 1);
-      if ("salle" in socket) {
-        salle.utilisateurs.splice(salle.utilisateurs.indexOf(socket.username), 1);
-        console.log("Utilisateurs", utilisateurs);
 
-        if (socket.salle.utilisateurs.length === 0) {
-          console.log("Dernier utilisateur de la salle code=" + socket.codeSalle + ". Suppression de la salle.");
-          delete salles[socket.codeSalle];
-          console.log(salles);
+      // Remove player from game
+      game.removePlayer(socket.username);
+
+      // Disconnected connection had a room attached to it
+      if ("room" in socket) {
+
+        // Remove player from room
+        socket.room.removePlayer(socket.username);
+        console.log("Room players", game.players);
+
+        // Send update to room players if in waiting state
+        if (socket.room.status === Room.STATUS_WAITING) {
+          socket.to(socket.room.code).emit("room_waiting_update", socket.room.players);
+        }
+
+        // If this was the last player in room, delete room
+        if (socket.room.players.length === 0) {
+          console.log("Last player for room with code=" + socket.room.code);
+          game.deleteRoom(socket.room.code);
         }
       }
     }

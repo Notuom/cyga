@@ -1,108 +1,108 @@
 $(function () {
   var socket = io();
   var username = false;
-  var utilisateurs = [];
+  var players = [];
 
-  //
-  // Interactions avec la page par l'utilisateur
-  //
+  /*
+   * User interactions
+   */
 
-  // Connexion (entrée du nom)
-  $("#connexion-form").submit(function (event) {
+  // Connection
+  $("#connection-form").submit(function (event) {
     event.preventDefault();
-    console.info("Envoi de la connexion...");
+    console.info("Sending connection...");
 
-    var username = $("#connexion-username").val();
+    var username = $("#connection-username").val();
     if (username.trim() !== "") {
-      socket.emit("utilisateur connexion demande", username);
+      socket.emit("user_connection_request", username);
     } else {
-      alert("Veuillez entrer un pseudonyme.");
+      alert("Please enter a username.");
     }
   });
 
-  // Joindre une salle existante
-  $("#salle-joindre-form").submit(function (event) {
+  // Join room
+  $("#room-join-form").submit(function (event) {
     event.preventDefault();
-    console.info("Envoi de la demande pour joindre la salle...");
+    console.info("Sending room_join_request...");
 
-    var code = $("#salle-joindre-code").val();
+    var code = $("#room-join-code").val();
     if (code.trim() !== "") {
-      socket.emit("salle joindre demande", code);
+      socket.emit("room_join_request", code);
     } else {
-      alert("Veuillez entrer un code de salle.");
+      alert("Please enter a room code.");
     }
   });
 
-  // Créer une nouvelle salle
+  // Create new room
   $("#salle-creer").click(function(event) {
     event.preventDefault();
-    console.info("Envoi de la demande pour créer une salle");
+    console.info("Sending room_create_request...");
 
-    socket.emit("salle creer demande");
+    socket.emit("room_create_request");
   });
 
-  //
-  // Écouteurs WebSockets
-  //
+  /*
+   * WebSockets listeners
+   */
 
-  // Le serveur accepte la connexion, afficher le formulaire de salle
-  socket.on("utilisateur connexion succes", function () {
-    console.info('"utilisateur connexion succes" reçu');
-    $(".panneau").hide();
-    $("#salle-joindre-form").show();
+  // Server accepted connection, show join/create form
+  socket.on("user_connection_success", function () {
+    console.info('"user_connection_success" received');
+    $(".game-panel").hide();
+    $("#room-join-form").show();
   });
 
-  // Le serveur n'accepte pas la connexion, afficher l'erreur
-  socket.on("utilisateur connexion erreur", function (erreur) {
-    console.info('"utilisateur connexion erreur" reçu');
+  // Server did not accept connection, show error
+  socket.on("user_connection_error", function (erreur) {
+    console.info('"user_connection_error" received');
     alert(erreur);
   });
 
-  // Le serveur accepte la création de salle, afficher le dashboard avec le code
-  socket.on("salle attente initialisation", function(data) {
-    console.info('"salle attente initialisation" reçu avec code=', data.code, ', admin=', data.admin);
-    $(".panneau").hide();
-    $("#salle-attente-form").show();
+  // Server accepted room creation, show waiting panel
+  socket.on("room_waiting_init", function(data) {
+    console.info('"room_waiting_init" received with code=', data.code, ', admin=', data.admin);
+    $(".game-panel").hide();
+    $("#room-waiting-form").show();
 
-    $("#code-salle").text(data.code);
-    rafraichirUtilisateurs(data.utilisateurs);
+    $("#room-code").text(data.code);
+    refreshPlayers(data.players);
 
     if (data.admin === true) {
-      $("#salle-attente-go").show();
+      $("#room-waiting-go").show();
     } else {
-      $("#salle-attente-go").hide();
+      $("#room-waiting-go").hide();
     }
   });
 
-  // Un nouvel utilisateur s'est connecté à la salle - rafraichir la liste
-  socket.on("salle attente update", function (utilisateurs) {
-    console.info('"salle attente update" reçu');
-    rafraichirUtilisateurs(utilisateurs);
+  // New user added  to current room
+  socket.on("room_waiting_update", function (players) {
+    console.info('"room_waiting_update" reçu');
+    refreshPlayers(players);
   });
 
-  // La salle demandée ne peut être rejoint
-  socket.on("salle attente erreur", function (erreur) {
-    console.info('"salle attente erreur" reçu');
+  // Requested room cannot be joined
+  socket.on("room_waiting_error", function (erreur) {
+    console.info('"room_waiting_error" reçu');
     alert(erreur);
   });
 
-  // Déconnexion
+  // Disconnected from socket server
   socket.on('disconnect', function () {
     console.info('"disconnect" reçu');
-    $(".panneau").hide();
-    $("#deconnexion-panel").show();
+    $(".game-panel").hide();
+    $("#disconnect-panel").show();
   });
 });
 
-//
-// Fonctions helper
-//
+/*
+ * Helper functions
+ */
 
-// Rafraichir la liste d'utilisateurs dans la salle d'attente
-function rafraichirUtilisateurs(utilisateurs) {
-  $("#salle-attente-utilisateurs").empty();
-  for (var i = 0; i < utilisateurs.length; i++) {
-    $("<tr><td>" + utilisateurs[i] + "</td></tr>")
-      .appendTo($("#salle-attente-utilisateurs"));
+// Rafraichir la liste d'players dans la salle d'attente
+function refreshPlayers(players) {
+  $("#room-waiting-players").empty();
+  for (var i = 0; i < players.length; i++) {
+    $("<tr><td>" + players[i] + "</td></tr>")
+      .appendTo($("#room-waiting-players"));
   }
 }
