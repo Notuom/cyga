@@ -110,6 +110,7 @@ io.on('connection', function (socket) {
 
         // Send update to room players if in waiting state
         if (socket.room.status === Room.STATUS_WAITING) {
+          // TODO give host to other player or remove game if host leaves?
           socket.to(socket.room.code).emit("room_waiting_update", socket.room.players);
         }
 
