@@ -1,6 +1,6 @@
 // Bootstrapping
 global.__base = __dirname + '/app/';
-var port = process.env.PORT || 8080;
+var config = require(__base + 'config');
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
@@ -19,11 +19,12 @@ var manager = new GameManager();
 var DatabaseManager = require(__base + 'database/DatabaseManager');
 
 var db = new DatabaseManager();
+
 //
 // Static HTTP server
 //
-server.listen(port, function () {
-  console.log('Server listening on port %d', port);
+server.listen(config.port, function () {
+  console.log('Server listening on port %d', config.port);
 });
 app.use(express.static(__dirname + '/public'));
 
@@ -165,7 +166,7 @@ io.on('connection', function (socket) {
   // Disconnect (managed by socket.io, can happen anytime)
   socket.on('disconnect', function () {
     if (socket.player !== null) {
-      console.log('Déconnection pour username=' + socket.player.username);
+      console.log('Disconnect for username=' + socket.player.username);
 
       // Remove player from games
       manager.removePlayer(socket.player.username);

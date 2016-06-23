@@ -1,10 +1,9 @@
-
+// Local configuration file that is used when .env is not used (for local development)
 var config = {};
 
+config.port = process.env.PORT
+  || 8080;
+config.databaseUrl = process.env.DATABASE_URL
+  || "postgres://***REMOVED***";
 
-config.database = {};
-
-config.database.username = "guillaumechevalier";
-config.database.password = "";
-config.database.port = "5432";
-config.database.database = "guillaumechevalier";
+module.exports = config;
