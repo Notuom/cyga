@@ -1,7 +1,7 @@
 $(function () {
   var socket = io();
   var username = false;
-  var players = [];
+  var answer = "";
 
   /*
    * User interactions
@@ -12,7 +12,7 @@ $(function () {
     event.preventDefault();
     console.info("Sending connection...");
 
-    var username = $("#connection-username").val();
+    username = $("#connection-username").val();
     if (username.trim() !== "") {
       socket.emit("user_connection_request", username);
     } else {
@@ -34,56 +34,99 @@ $(function () {
   });
 
   // Create new room
-  $("#salle-creer").click(function(event) {
+  $("#room-create").click(function (event) {
     event.preventDefault();
     console.info("Sending room_create_request...");
 
-    socket.emit("room_create_request");
+    socket.emit("room_create_request", parseInt($("#room-create-turns").val()));
+  });
+
+  // Start game
+  $("#room-waiting-form").submit(function (event) {
+    event.preventDefault();
+    console.info("Sending room_start_request...");
+
+    socket.emit("room_start_request");
+  });
+
+  // Send description for game round
+  $("#game-round-form").submit(function (event) {
+    event.preventDefault();
+    $("#game-round-description, #game-round-submit").prop("disabled", true);
+
+    console.info("Sending room_round_description...");
+    answer = $("#game-round-description").val();
+    socket.emit("room_round_description", answer);
   });
 
   /*
    * WebSockets listeners
    */
-
   // Server accepted connection, show join/create form
   socket.on("user_connection_success", function () {
     console.info('"user_connection_success" received');
     $(".game-panel").hide();
     $("#room-join-form").show();
-  });
-
-  // Server did not accept connection, show error
-  socket.on("user_connection_error", function (erreur) {
-    console.info('"user_connection_error" received');
-    alert(erreur);
+    $("#room-join-code").focus();
   });
 
   // Server accepted room creation, show waiting panel
-  socket.on("room_waiting_init", function(data) {
+  socket.on("room_waiting_init", function (data) {
     console.info('"room_waiting_init" received with code=', data.code, ', admin=', data.admin);
     $(".game-panel").hide();
     $("#room-waiting-form").show();
 
-    $("#room-code").text(data.code);
+    $(".room-code").text(data.code);
+    $(".game-round-turns").text(data.turns);
     refreshPlayers(data.players);
 
-    if (data.admin === true) {
-      $("#room-waiting-go").show();
-    } else {
-      $("#room-waiting-go").hide();
-    }
+    $("#room-waiting-go").toggle(data.admin === true);
   });
 
   // New user added  to current room
   socket.on("room_waiting_update", function (players) {
-    console.info('"room_waiting_update" reçu');
+    console.info('"room_waiting_update" received');
     refreshPlayers(players);
   });
 
-  // Requested room cannot be joined
-  socket.on("room_waiting_error", function (erreur) {
-    console.info('"room_waiting_error" reçu');
-    alert(erreur);
+  // Start new game round
+  socket.on("room_start_round", function (data) {
+    console.info('"room_start_round" received');
+    $(".game-panel").hide();
+
+    $(".game-round-round").text(data.round);
+    $(".game-round-acronym").text(data.acronym);
+    $("#game-round-form").show();
+  });
+
+  // Start voting
+  socket.on("room_start_vote", function (data) {
+    console.info("room_start_vote received");
+    console.log(data);
+    $("#game-round-description-container").hide();
+    var container$ = $("#game-round-voting-container");
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].answer !== answer) {
+        $('<button type="button" class="list-group-item">' + data[i].answer + '</button>')
+          .click(function (event) {
+            if (!$(this).hasClass("disabled")) {
+              $("#game-round-voting-container .list-group-item").addClass("disabled");
+              $(this).append('<span class="badge"><i class="glyphicon glyphicon-ok"></i></span>')
+
+              console.info("Sending room_round_vote...");
+              socket.emit("room_round_vote", $(this).data("answer"));
+            }
+          })
+          .data("answer", data[i].answer)
+          .appendTo(container$);
+      }
+    }
+  });
+
+  // Receive generic error from server, alert it
+  socket.on("generic_error", function (error) {
+    console.info('"generic_error" received : ' + error);
+    alert(error);
   });
 
   // Disconnected from socket server
@@ -102,7 +145,7 @@ $(function () {
 function refreshPlayers(players) {
   $("#room-waiting-players").empty();
   for (var i = 0; i < players.length; i++) {
-    $("<tr><td>" + players[i] + "</td></tr>")
+    $("<tr><td>" + players[i].username + "</td></tr>")
       .appendTo($("#room-waiting-players"));
   }
 }

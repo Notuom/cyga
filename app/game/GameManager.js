@@ -8,6 +8,8 @@ var Room = require(__base + 'game/Room');
  * @constructor
  */
 var GameManager = function RoomManager() {
+  this.rooms = {};
+  this.players = [];
 };
 
 /*
@@ -17,12 +19,12 @@ var GameManager = function RoomManager() {
  * Map of all rooms by code.
  * @type {Array}
  */
-GameManager.prototype.rooms = {};
+GameManager.prototype.rooms = null;
 
 /**
  * List of all players logged on the game.
  */
-GameManager.prototype.players = [];
+GameManager.prototype.players = null;
 
 /*
  * Public methods
@@ -30,8 +32,7 @@ GameManager.prototype.players = [];
 /**
  * Create a new room to manage it.
  */
-GameManager.prototype.createRoom = function createRoom() {
-  console.log(Room);
+GameManager.prototype.createRoom = function createRoom(turns) {
 
   // Generate a new room code which doesn't exist
   var code;
@@ -41,12 +42,11 @@ GameManager.prototype.createRoom = function createRoom() {
       code += Room.ROOM_CODE_CHARACTERS.charAt(Math.floor(Math.random() * Room.ROOM_CODE_CHARACTERS.length));
     }
   } while (this.roomExists(code));
-  var room = new Room(code);
+  var room = new Room(code, turns);
 
   this.rooms[code] = room;
 
   console.log('Created room with code=' + code);
-  console.log(this.rooms);
   return room;
 };
 
