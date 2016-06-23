@@ -1,9 +1,14 @@
+var Acronym = require(__base + "game/Acronym");
+
 /**
- * Room in which a game is played. A unique code is generated in the code field.
+ * Room in which a game is played. Keeps information about an upcoming or ongoing game session.
  * @constructor
  */
-var Room = function Room(code) {
+var Room = function Room(code, turns) {
   this.code = code;
+  this.turns = turns;
+  this.players = [];
+  this.acronyms = Acronym.getRandomAcronyms(turns);
 };
 
 /*
@@ -27,6 +32,18 @@ Room.STATUS_ACTIVE = 1;
  */
 Room.ROOM_CODE_CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890";
 
+/**
+ * Minimum number of players to start a game.
+ * @type {number}
+ */
+Room.MIN_PLAYERS = 3;
+
+/**
+ * Maximum number of players in a game.
+ * @type {number}
+ */
+Room.MAX_PLAYERS = 8;
+
 /*
  * Public fields
  */
@@ -47,7 +64,31 @@ Room.prototype.code = null;
  * @see Player
  * @type {Array}
  */
-Room.prototype.players = [];
+Room.prototype.players = null;
+
+/**
+ * Number of turns to be played in this game.
+ * @type {number}
+ */
+Room.prototype.turns = 0;
+
+/**
+ * Current round of the game.
+ * @type {number}
+ */
+Room.prototype.round = 0;
+
+/**
+ * List of all acronyms that will be played during this game.
+ * @type {Acronym[]}
+ */
+Room.prototype.acronyms = null;
+
+/**
+ * Current acronym being played in the round.
+ * @type {Acronym}
+ */
+Room.prototype.acronym = null;
 
 /*
  * Public methods
@@ -75,6 +116,28 @@ Room.prototype.removePlayer = function removePlayer(username) {
  */
 Room.prototype.playerExists = function playerExists(username) {
   return this.players.indexOf(username) !== -1;
+};
+
+/**
+ * @returns {boolean} true if the room has enough players to start.
+ */
+Room.prototype.hasMinPlayers = function hasMinPlayers() {
+  return this.players.length >= Room.MIN_PLAYERS;
+};
+
+/**
+ * @returns {boolean} true if the room does not exceed the player limit to start.
+ */
+Room.prototype.hasMaxPlayers = function hasMaxPlayers() {
+  return this.players.length <= Room.MAX_PLAYERS;
+};
+
+/**
+ * Go to the next round (increment round number, get random acronym
+ */
+Room.prototype.nextRound = function nextRound() {
+  this.round++;
+  this.acronym = this.acronyms.pop();
 };
 
 module.exports = Room;

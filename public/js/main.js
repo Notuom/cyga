@@ -34,28 +34,30 @@ $(function () {
   });
 
   // Create new room
-  $("#salle-creer").click(function(event) {
+  $("#room-create").click(function(event) {
     event.preventDefault();
     console.info("Sending room_create_request...");
 
-    socket.emit("room_create_request");
+    socket.emit("room_create_request", parseInt($("#room-create-turns").val()));
+  });
+
+  // Start game
+  $("#room-waiting-form").submit(function (event) {
+    event.preventDefault();
+    console.info("Sending room_start_request...");
+
+    socket.emit("room_start_request");
   });
 
   /*
    * WebSockets listeners
    */
-
   // Server accepted connection, show join/create form
   socket.on("user_connection_success", function () {
     console.info('"user_connection_success" received');
     $(".game-panel").hide();
     $("#room-join-form").show();
-  });
-
-  // Server did not accept connection, show error
-  socket.on("user_connection_error", function (erreur) {
-    console.info('"user_connection_error" received');
-    alert(erreur);
+    $("#room-join-code").focus();
   });
 
   // Server accepted room creation, show waiting panel
@@ -64,26 +66,33 @@ $(function () {
     $(".game-panel").hide();
     $("#room-waiting-form").show();
 
-    $("#room-code").text(data.code);
+    $(".room-code").text(data.code);
+    $("#game-round-turns").text(data.turns);
     refreshPlayers(data.players);
 
-    if (data.admin === true) {
-      $("#room-waiting-go").show();
-    } else {
-      $("#room-waiting-go").hide();
-    }
+    $("#room-waiting-go").toggle(data.admin === true);
   });
 
   // New user added  to current room
   socket.on("room_waiting_update", function (players) {
-    console.info('"room_waiting_update" reçu');
+    console.info('"room_waiting_update" received');
     refreshPlayers(players);
   });
 
-  // Requested room cannot be joined
-  socket.on("room_waiting_error", function (erreur) {
-    console.info('"room_waiting_error" reçu');
-    alert(erreur);
+  // Start new game round
+  socket.on("room_start_round", function(data) {
+    console.info('"room_start_round" received');
+    $(".game-panel").hide();
+
+    $("#game-round-round").text(data.round);
+    $("#game-round-acronym").text(data.acronym);
+    $("#game-round-panel").show();
+  });
+
+  // Receive generic error from server, alert it
+  socket.on("generic_error", function (error) {
+    console.info('"generic_error" received : ' + error);
+    alert(error);
   });
 
   // Disconnected from socket server
@@ -102,7 +111,7 @@ $(function () {
 function refreshPlayers(players) {
   $("#room-waiting-players").empty();
   for (var i = 0; i < players.length; i++) {
-    $("<tr><td>" + players[i] + "</td></tr>")
+    $("<tr><td>" + players[i].username + "</td></tr>")
       .appendTo($("#room-waiting-players"));
   }
 }

@@ -12,7 +12,7 @@
 <div class="container">
   <h1><abbr title="Can You Guess the Acronym">CYGA</abbr></h1>
 
-  <!-- Formulaire de connection -->
+  <!-- Login form -->
   <form action="/" method="post" id="connection-form" class="form game-panel">
     <div class="row">
       <div class="col-sm-6">
@@ -27,7 +27,7 @@
     </div>
   </form>
 
-  <!-- Formulaire pour créer ou rejoindre une salle -->
+  <!-- Join room form -->
   <form action="/" method="post" id="room-join-form" class="form game-panel" hidden>
     <h2>Join a room</h2>
     <div class="row">
@@ -41,15 +41,16 @@
       </div>
     </div>
     <h2>Create a room</h2>
-    <button type="button" id="salle-creer" name="salle-creer" class="btn btn-success"><i class="glyphicon glyphicon-plus
+    <label class="control-label" for="room-create-turns">Number of turns</label>
+    <input class="form-control" type="number" id="room-create-turns" min="10" max="50" value="10">
+    <button type="button" id="room-create" name="room-create" class="btn btn-success"><i class="glyphicon glyphicon-plus
 "></i> Create room
     </button>
   </form>
 
-  <!-- Tableau de bord pour l'attente du début de la partie -->
+  <!-- Waiting room -->
   <form action="/" method="post" id="room-waiting-form" class="form game-panel" hidden>
-    <h2>Room <span id="room-code">{{code}}</span></h2>
-
+    <h2>Room <span class="room-code">{{code}}</span></h2>
     <table class="table table-striped">
       <thead>
       <tr>
@@ -59,12 +60,21 @@
       <tbody id="room-waiting-players"></tbody>
     </table>
 
-    <button type="button" id="room-waiting-go" name="room-waiting-go" class="btn btn-success" hidden>
+    <button type="submit" id="room-waiting-go" name="room-waiting-go" class="btn btn-success" hidden>
       <i class="glyphicon glyphicon-ok"></i> Start game
     </button>
   </form>
 
-  <!-- game-panel affiché lors de la déconnection -->
+  <!-- Game round panel -->
+  <form action="/" method="post" id="game-round-panel" class="game-panel" hidden>
+    <h2>Room <span class="room-code">{{code}}</span></h2>
+    <h3>Round <span id="game-round-round">{{round}}</span>/<span id="game-round-turns">{{turns}}</span></h3>
+    <h4 id="game-round-acronym">{{acronym}}</h4>
+    <textarea class="form-control" id="game-round-description" placeholder="Entrez votre description..."></textarea>
+    <button type="button" class="btn btn-primary"></button>
+  </form>
+
+  <!-- Panneau affiché lors de la déconnection -->
   <div id="disconnect-panel" class="panel panel-danger" hidden>
     <div class="panel-heading">
       <h3>Disconnected</h3>

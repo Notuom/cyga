@@ -2,3 +2,13 @@
   font-family: monospace;
   text-transform: uppercase;
 }
+
+#room-create {
+  margin-top: 15px;
+}
+
+#game-round-acronym {
+  margin: 20px auto;
+  font-size: 48px;
+  text-align: center;
+}
