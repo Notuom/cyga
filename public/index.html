@@ -10,7 +10,7 @@
 
 <body>
 <div class="container">
-  <h1><abbr title="Can You Guess the Acronym">CYGA</abbr></h1>
+  <h1><i class="glyphicon glyphicon-tag"></i> <abbr title="Can You Guess the Acronym">CYGA</abbr></h1>
 
   <!-- Login form -->
   <form action="/" method="post" id="connection-form" class="form game-panel">
@@ -66,21 +66,25 @@
   </form>
 
   <!-- Game round panel -->
-  <form action="/" method="post" id="game-round-panel" class="game-panel" hidden>
+  <form action="/" method="post" id="game-round-form" class="game-panel" hidden>
     <h2>Room <span class="room-code">{{code}}</span></h2>
-    <h3>Round <span id="game-round-round">{{round}}</span>/<span id="game-round-turns">{{turns}}</span></h3>
-    <h4 id="game-round-acronym">{{acronym}}</h4>
-    <textarea class="form-control" id="game-round-description" placeholder="Entrez votre description..."></textarea>
-    <button type="button" class="btn btn-primary"></button>
+    <h3>Round <span class="game-round-round">{{round}}</span>/<span class="game-round-turns">{{turns}}</span></h3>
+    <h4 class="game-round-acronym">{{acronym}}</h4>
+
+    <div id="game-round-description-container">
+      <input type="text" class="form-control" id="game-round-description" placeholder="Enter description...">
+      <button id="game-round-submit" type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-tag"></i> Submit</button>
+    </div>
+    <div id="game-round-voting-container" class="list-group"></div>
   </form>
 
-  <!-- Panneau affiché lors de la déconnection -->
+  <!-- Disconnect message panel -->
   <div id="disconnect-panel" class="panel panel-danger" hidden>
     <div class="panel-heading">
       <h3>Disconnected</h3>
     </div>
     <div class="panel-body">
-      You have been disconnected for the server. <a href="/">Click here</a> to start over.
+      You have been disconnected from the server. <a href="/">Click here</a> to start over.
     </div>
   </div>
 </div>

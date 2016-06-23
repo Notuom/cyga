@@ -1,7 +1,7 @@
 $(function () {
   var socket = io();
   var username = false;
-  var players = [];
+  var answer = "";
 
   /*
    * User interactions
@@ -12,7 +12,7 @@ $(function () {
     event.preventDefault();
     console.info("Sending connection...");
 
-    var username = $("#connection-username").val();
+    username = $("#connection-username").val();
     if (username.trim() !== "") {
       socket.emit("user_connection_request", username);
     } else {
@@ -34,7 +34,7 @@ $(function () {
   });
 
   // Create new room
-  $("#room-create").click(function(event) {
+  $("#room-create").click(function (event) {
     event.preventDefault();
     console.info("Sending room_create_request...");
 
@@ -49,6 +49,16 @@ $(function () {
     socket.emit("room_start_request");
   });
 
+  // Send description for game round
+  $("#game-round-form").submit(function (event) {
+    event.preventDefault();
+    $("#game-round-description, #game-round-submit").prop("disabled", true);
+
+    console.info("Sending room_round_description...");
+    answer = $("#game-round-description").val();
+    socket.emit("room_round_description", answer);
+  });
+
   /*
    * WebSockets listeners
    */
@@ -61,13 +71,13 @@ $(function () {
   });
 
   // Server accepted room creation, show waiting panel
-  socket.on("room_waiting_init", function(data) {
+  socket.on("room_waiting_init", function (data) {
     console.info('"room_waiting_init" received with code=', data.code, ', admin=', data.admin);
     $(".game-panel").hide();
     $("#room-waiting-form").show();
 
     $(".room-code").text(data.code);
-    $("#game-round-turns").text(data.turns);
+    $(".game-round-turns").text(data.turns);
     refreshPlayers(data.players);
 
     $("#room-waiting-go").toggle(data.admin === true);
@@ -80,13 +90,37 @@ $(function () {
   });
 
   // Start new game round
-  socket.on("room_start_round", function(data) {
+  socket.on("room_start_round", function (data) {
     console.info('"room_start_round" received');
     $(".game-panel").hide();
 
-    $("#game-round-round").text(data.round);
-    $("#game-round-acronym").text(data.acronym);
-    $("#game-round-panel").show();
+    $(".game-round-round").text(data.round);
+    $(".game-round-acronym").text(data.acronym);
+    $("#game-round-form").show();
+  });
+
+  // Start voting
+  socket.on("room_start_vote", function (data) {
+    console.info("room_start_vote received");
+    console.log(data);
+    $("#game-round-description-container").hide();
+    var container$ = $("#game-round-voting-container");
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].answer !== answer) {
+        $('<button type="button" class="list-group-item">' + data[i].answer + '</button>')
+          .click(function (event) {
+            if (!$(this).hasClass("disabled")) {
+              $("#game-round-voting-container .list-group-item").addClass("disabled");
+              $(this).append('<span class="badge"><i class="glyphicon glyphicon-ok"></i></span>')
+
+              console.info("Sending room_round_vote...");
+              socket.emit("room_round_vote", $(this).data("answer"));
+            }
+          })
+          .data("answer", data[i].answer)
+          .appendTo(container$);
+      }
+    }
   });
 
   // Receive generic error from server, alert it

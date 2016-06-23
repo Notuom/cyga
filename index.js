@@ -113,7 +113,7 @@ io.on('connection', function (socket) {
     }
   });
 
-  // Start game
+  // Start 1st game round
   socket.on('room_start_request', function () {
     console.log('"room_start_request" received');
 
@@ -124,7 +124,7 @@ io.on('connection', function (socket) {
       if (socket.room.hasMinPlayers() && socket.room.hasMaxPlayers()) {
         socket.room.nextRound();
 
-        // Send round update to all including owner
+        // Send round update to all in room
         socket.nsp.to(socket.room.code).emit("room_start_round", {
           round: socket.room.round,
           acronym: socket.room.acronym.name
@@ -141,6 +141,19 @@ io.on('connection', function (socket) {
     // Player is not admin
     else {
       socket.emit("generic_error", "Only the host can start the game.");
+    }
+  });
+
+  // Receive description from player
+  socket.on('room_round_description', function (description) {
+    console.log('"room_round_description" received with description=' + description);
+    socket.player.answer = description;
+    if (socket.room.allPlayersAnswered()) {
+
+      // Send voting start with all player descriptions. This is not secure as the username is sent along.
+      socket.nsp.to(socket.room.code).emit("room_start_vote", socket.room.players.map(function (player) {
+        return {username: player.username, answer: player.answer};
+      }));
     }
   });
 

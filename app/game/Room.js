@@ -140,4 +140,15 @@ Room.prototype.nextRound = function nextRound() {
   this.acronym = this.acronyms.pop();
 };
 
+/**
+ * @returns {boolean} true if all players have answered and we can proceed to vote
+ */
+Room.prototype.allPlayersAnswered = function allPlayersAnswered() {
+  for (var i = 0; i < this.players.length; i++) {
+    if (this.players[i].answer === null)
+      return false;
+  }
+  return true;
+};
+
 module.exports = Room;

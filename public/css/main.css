@@ -1,14 +1,17 @@
+h1 i {
+  font-size: 40px;
+}
 #room-join-code {
   font-family: monospace;
   text-transform: uppercase;
 }
 
-#room-create {
+#room-create, #game-round-submit {
   margin-top: 15px;
 }
 
-#game-round-acronym {
+.game-round-acronym {
   margin: 20px auto;
-  font-size: 48px;
+  font-size: 64px;
   text-align: center;
 }
