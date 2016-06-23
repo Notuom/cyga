@@ -12,6 +12,10 @@ var Room = require(__base + 'game/Room');
 
 var game = new GameManager();
 
+// Database class
+var DatabaseManager = require(__base + 'database/DatabaseManager');
+
+var db = new DatabaseManager();
 //
 // Static HTTP server
 //
@@ -19,6 +23,7 @@ server.listen(port, function () {
   console.log('Server listening on port %d', port);
 });
 app.use(express.static(__dirname + '/public'));
+
 
 //
 // WebSockets server
@@ -30,6 +35,7 @@ io.on('connection', function (socket) {
   // Register player
   socket.on('user_connection_request', function (username) {
     console.log('"user_connection_request" received with username=' + username);
+
     if (!game.playerExists(username)) {
       game.addPlayer(username);
       socket.username = username;
@@ -122,4 +128,6 @@ io.on('connection', function (socket) {
       }
     }
   });
+
+
 });
