@@ -17,7 +17,6 @@ var manager = new GameManager();
 
 // Database class
 var DatabaseManager = require(__base + 'database/DatabaseManager');
-
 var db = new DatabaseManager();
 
 //

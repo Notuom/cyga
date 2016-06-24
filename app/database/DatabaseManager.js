@@ -1,5 +1,6 @@
 var config = require(__base + 'config');
 var pg = require('pg');
+pg.defaults.ssl = true;
 /*
  * Public methods
  */
@@ -8,12 +9,10 @@ var pg = require('pg');
  * @constructor
  */
 var DatabaseManager = function DatabaseManager() {
-  this.listTables();
+
 };
 
 DatabaseManager.prototype.listTables = function listTables() {
-  console.log('Connecting to postgres.');
-  pg.defaults.ssl = true;
   pg.connect(config.databaseUrl, function (err, client) {
     if (err) {
       console.log(err);
