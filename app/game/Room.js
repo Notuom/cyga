@@ -151,4 +151,11 @@ Room.prototype.allPlayersAnswered = function allPlayersAnswered() {
   return true;
 };
 
+/**
+ * @returns {Number} get the totla number of players within the room
+ */
+Room.prototype.getAllCurrentPlayers = function getAllCurrentPlayers() {
+  return this.players.length;
+}
+
 module.exports = Room;
