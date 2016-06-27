@@ -6,7 +6,7 @@ CREATE TYPE UserType AS ENUM ('admin', 'user');
 
 CREATE TABLE Users
 (
-  userId INT PRIMARY KEY,
+  userId SERIAL PRIMARY KEY,
   username VARCHAR(20) NOT NULL UNIQUE,
   password VARCHAR(20) NOT NULL,
   email VARCHAR(60),
@@ -17,14 +17,14 @@ CREATE TABLE Users
 
 CREATE TABLE Game
 (
-  gameId INT PRIMARY KEY,
+  gameId SERIAL PRIMARY KEY,
   winnerId INTEGER NOT NULL REFERENCES Users(userId),
   gameDate TIMESTAMP DEFAULT current_timestamp(2)
 );
 
 CREATE TABLE Game_Users
 (
-  game_UserId INT PRIMARY KEY,
+  game_UserId SERIAL PRIMARY KEY,
   score INTEGER NOT NULL,
   gameId INTEGER NOT NULL REFERENCES Game(gameId),
   userId INTEGER NOT NULL REFERENCES Users(userId)
@@ -32,7 +32,7 @@ CREATE TABLE Game_Users
 
 CREATE TABLE Acronym
 (
-  acronymId INT PRIMARY KEY,
+  acronymId SERIAL PRIMARY KEY,
   acronym VARCHAR(10) NOT NULL,
   definition VARCHAR(100) NOT NULL,
   dateAdded TIMESTAMP DEFAULT current_timestamp(2),
