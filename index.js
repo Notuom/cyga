@@ -65,6 +65,12 @@ io.on('connection', function (socket) {
     socket.room = room;
     socket.join(room.code);
 
+    socket.emit("add_room_to_lobby", {
+      code : room.code,
+      max_player : room.getMaxPlayers(),
+      current_players : room.getAllCurrentPlayers()
+    });
+
     socket.emit("room_waiting_init", {
       admin: true,
       code: room.code,
@@ -192,6 +198,4 @@ io.on('connection', function (socket) {
       }
     }
   });
-
-
 });

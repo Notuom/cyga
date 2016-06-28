@@ -21,15 +21,15 @@ $(function () {
   });
 
   // Join room
-  $("#room-join-form").submit(function (event) {
+  $("#room-join-form #room-join").click(function (event) {
     event.preventDefault();
     console.info("Sending room_join_request...");
-
-    var code = $("#room-join-code").val();
+    var t = $(this);
+    var code = t.data("room");
     if (code.trim() !== "") {
       socket.emit("room_join_request", code);
     } else {
-      alert("Please enter a room code.");
+      alert("There is an error with this room, please pick another one.");
     }
   });
 
@@ -81,6 +81,12 @@ $(function () {
     refreshPlayers(data.players);
 
     $("#room-waiting-go").toggle(data.admin === true);
+  });
+
+  // New room added to lobby
+  socket.on("add_room_to_lobby", function (data) {
+    console.info('"add_room_to_lobby" received');
+    createHtmlRoom(data.code, data.current_players, data.max_player);
   });
 
   // New user added  to current room
@@ -149,3 +155,17 @@ function refreshPlayers(players) {
       .appendTo($("#room-waiting-players"));
   }
 }
+
+// Create the HTML for the room in lobby
+function createHtmlRoom(code, current, max) {
+  var li = $('<li id="'+code+'" class="list-group-item"></li>');
+  var button = $('<button type="button" data-room="'+code+'" id="room-join" name="room-join" class="btn btn-sm btn-success pull-right"></button>');
+  var icon = '<i class="glyphicon glyphicon-plus"></i>';
+  var roomCode = '<span class="room-join-code">'+code+'</span>';
+  var minPlayer = '<span class="label label-default label-pill pull-xs-right min-players">'+current+'</span>/';
+  var maxPlayer = '<span class="label label-default label-pill pull-xs-right max-player">'+max+'</span>';
+  button.append(icon);
+  li.append(roomCode,minPlayer,maxPlayer,button);
+  $("#room-list").append(li);
+}
+

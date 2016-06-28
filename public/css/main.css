@@ -15,3 +15,9 @@ h1 i {
   font-size: 64px;
   text-align: center;
 }
+#room-list li{
+  font-size : 14px;
+}
+.label-default {
+  background-color:#818a91;
+}

@@ -152,10 +152,18 @@ Room.prototype.allPlayersAnswered = function allPlayersAnswered() {
 };
 
 /**
- * @returns {Number} get the totla number of players within the room
+ * @returns {Number} get the total number of players within the room
  */
 Room.prototype.getAllCurrentPlayers = function getAllCurrentPlayers() {
   return this.players.length;
-}
+};
+
+/**
+ * @returns {Number} get the total number of players within the room
+ */
+Room.prototype.getMaxPlayers = function getMaxPlayers() {
+  return Room.MAX_PLAYERS;
+};
+
 
 module.exports = Room;
