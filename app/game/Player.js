@@ -13,15 +13,28 @@ var Player = function Player(username) {
 Player.prototype.username = null;
 
 /**
- * Player's current score
+ * Player's current score for this round
  * @type {number}
  */
-Player.prototype.score = 0;
+Player.prototype.roundScore = 0;
+
+/**
+ * Player's current score for this game
+ * @type {number}
+ */
+Player.prototype.gameScore = 0;
 
 /**
  * Player's answer to the latest question
  * @type {string}
  */
 Player.prototype.answer = null;
+
+
+/**
+ * Player's current vote for this round
+ * @type {string}
+ */
+Player.prototype.vote = null;
 
 module.exports = Player;

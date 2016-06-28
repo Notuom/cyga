@@ -92,11 +92,13 @@ $(function () {
   // Start new game round
   socket.on("room_start_round", function (data) {
     console.info('"room_start_round" received');
-    $(".game-panel").hide();
+    $("#game-round-tally-container, .game-panel").hide();
 
     $(".game-round-round").text(data.round);
     $(".game-round-acronym").text(data.acronym);
-    $("#game-round-form").show();
+    $("#game-round-form, #game-round-description-container").show();
+    $("#game-round-description, #game-round-submit").prop("disabled", false);
+    $("#game-round-description").val("").focus();
   });
 
   // Start voting
@@ -105,21 +107,38 @@ $(function () {
     console.log(data);
     $("#game-round-description-container").hide();
     var container$ = $("#game-round-voting-container");
+    container$.empty().show();
     for (var i = 0; i < data.length; i++) {
-      if (data[i].answer !== answer) {
-        $('<button type="button" class="list-group-item">' + data[i].answer + '</button>')
+      if (data[i] !== answer) {
+        $('<button type="button" class="list-group-item">' + data[i] + '</button>')
           .click(function (event) {
             if (!$(this).hasClass("disabled")) {
               $("#game-round-voting-container .list-group-item").addClass("disabled");
-              $(this).append('<span class="badge"><i class="glyphicon glyphicon-ok"></i></span>')
+              $(this).append('<span class="badge"><i class="glyphicon glyphicon-ok"></i></span>');
 
-              console.info("Sending room_round_vote...");
+              console.info("Sending room_round_vote...", $(this).data("answer"));
               socket.emit("room_round_vote", $(this).data("answer"));
             }
           })
-          .data("answer", data[i].answer)
+          .data("answer", data[i])
           .appendTo(container$);
       }
+    }
+  });
+
+  // Show tally
+  socket.on("room_show_tally", function (tally) {
+    $("#game-round-voting-container").hide();
+    $("#game-round-tally-container").show();
+    var container$ = $("#game-round-tally");
+    container$.empty();
+    for (var i = 0; i < tally.length; i++) {
+      var tr$ = $('<tr></tr>');
+      tr$.append('<td>' + tally[i].username + '</td>');
+      tr$.append('<td>' + tally[i].answer + '</td>');
+      tr$.append('<td>' + tally[i].roundScore + '</td>');
+      tr$.append('<td>' + tally[i].gameScore + '</td>');
+      tr$.appendTo(container$);
     }
   });
 

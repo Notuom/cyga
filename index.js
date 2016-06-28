@@ -23,7 +23,7 @@ var db = new DatabaseManager();
 // Static HTTP server
 //
 server.listen(config.port, function () {
-  console.log('Server listening on port %d', config.port);
+  console.log('Server listening on http://localhost:%d/', config.port);
 });
 app.use(express.static(__dirname + '/public'));
 
@@ -130,10 +130,7 @@ io.on('connection', function (socket) {
         socket.room.nextRound();
 
         // Send round update to all in room
-        socket.nsp.to(socket.room.code).emit("room_start_round", {
-          round: socket.room.round,
-          acronym: socket.room.acronym.name
-        });
+        socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
       }
 
       // Not enough players / too many (shouldn't happen...)
@@ -152,13 +149,37 @@ io.on('connection', function (socket) {
   // Receive description from player
   socket.on('room_round_description', function (description) {
     console.log('"room_round_description" received with description=' + description);
+
+    // TODO : if two players have the same answer at the moment it could be problematic?
+    // it should just vote for both but is problematic if all players have the exact same answer. (very much an edge case, nobody cares)
     socket.player.answer = description;
     if (socket.room.allPlayersAnswered()) {
 
-      // Send voting start with all player descriptions. This is not secure as the username is sent along.
-      socket.nsp.to(socket.room.code).emit("room_start_vote", socket.room.players.map(function (player) {
-        return {username: player.username, answer: player.answer};
-      }));
+      // Send voting start with all player descriptions.
+      socket.nsp.to(socket.room.code).emit("room_start_vote", socket.room.getPlayerDescriptions());
+    }
+  });
+
+  // Receive vote from player
+  socket.on('room_round_vote', function (vote) {
+    console.log('"room_round_vote" received with vote=' + vote);
+    socket.player.vote = vote;
+
+    // Add player score
+    socket.room.addVoteForAnswer(vote);
+
+    if (socket.room.allPlayersVoted()) {
+
+      // Send tally to client
+      socket.nsp.to(socket.room.code).emit("room_show_tally", socket.room.getTally());
+
+      // Reset player answers and votes for next round
+      socket.room.nextRound();
+
+      // Set a time out for when the tally should stop being shown
+      setTimeout(function timeoutRoomTally() {
+        socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
+      }, GameManager.TALLY_DISPLAY_DELAY);
     }
   });
 
@@ -192,6 +213,4 @@ io.on('connection', function (socket) {
       }
     }
   });
-
-
 });

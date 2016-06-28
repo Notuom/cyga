@@ -136,8 +136,20 @@ Room.prototype.hasMaxPlayers = function hasMaxPlayers() {
  * Go to the next round (increment round number, get random acronym
  */
 Room.prototype.nextRound = function nextRound() {
+  this.resetRound();
   this.round++;
   this.acronym = this.acronyms.pop();
+};
+
+/**
+ * JSON message which is sent when a round starts.
+ * @returns {{round: number, acronym: string}}
+ */
+Room.prototype.getRoundStartMessage = function getRoomStartMessage() {
+  return {
+    round: this.round,
+    acronym: this.acronym.name
+  };
 };
 
 /**
@@ -149,6 +161,70 @@ Room.prototype.allPlayersAnswered = function allPlayersAnswered() {
       return false;
   }
   return true;
+};
+
+/**
+ * Returns a list of descriptions for display on client when beginning vote.
+ * @returns {string[]} answers for which plaeyers can vote
+ */
+Room.prototype.getPlayerDescriptions = function getPlayerDescriptions() {
+  return this.players.map(function (player) {
+    // Get player answers in array
+    return player.answer;
+  }).filter(function (answer, index, self) {
+    // Remove duplicates TODO might not be necessary if we don't let people have the same answer
+    return index == self.indexOf(answer);
+  });
+};
+
+/**
+ * Add a vote to a player corresponding to an answer
+ * @param vote textual value of the answer for which a vote must be added
+ */
+Room.prototype.addVoteForAnswer = function addVoteForAnswer(vote) {
+  for (var i = 0; i < this.players.length; i++) {
+    if (this.players[i].answer === vote) {
+      this.players[i].gameScore++;
+      this.players[i].roundScore++;
+    }
+  }
+};
+
+/**
+ * @returns {boolean} true if all players have answered and we can proceed to tally
+ */
+Room.prototype.allPlayersVoted = function allPlayersVoted() {
+  for (var i = 0; i < this.players.length; i++) {
+    if (this.players[i].vote === null)
+      return false;
+  }
+  return true;
+};
+
+/**
+ * Reset player answers when voting ends
+ */
+Room.prototype.resetRound = function resetRound() {
+  for (var i = 0; i < this.players.length; i++) {
+    this.players[i].roundScore = 0;
+    this.players[i].answer = null;
+    this.players[i].vote = null;
+  }
+};
+
+/**
+ * Return tally from current round and game for display on the client
+ * @returns {Array|*}
+ */
+Room.prototype.getTally = function getTally() {
+  return this.players.map(function (player) {
+    return {
+      username: player.username,
+      answer: player.answer,
+      roundScore: player.roundScore,
+      gameScore: player.gameScore
+    };
+  });
 };
 
 module.exports = Room;

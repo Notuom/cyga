@@ -13,6 +13,11 @@ var GameManager = function RoomManager() {
 };
 
 /*
+ * Constants
+ */
+GameManager.TALLY_DISPLAY_DELAY = 5000;
+
+/*
  * Public fields
  */
 /**
