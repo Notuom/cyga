@@ -43,6 +43,17 @@ io.on('connection', function (socket) {
     if (!manager.playerExists(username)) {
       manager.addPlayer(username);
       socket.player = new Player(username);
+      socket.join("lobby");
+      for (var room in manager.rooms) {
+        console.log(room);
+        /*var currentRoom = {
+          status : room.status,
+          code : room.code,
+          current_players : room.getAllCurrentPlayers(),
+          max_player : room.MAX_PLAYERS
+        };
+        socket.emit('show_lobby', currentRoom);*/
+      }
       socket.emit('user_connection_success');
     }
 
@@ -63,9 +74,10 @@ io.on('connection', function (socket) {
 
     socket.admin = true;
     socket.room = room;
+    socket.leave("lobby");
     socket.join(room.code);
 
-    socket.emit("add_room_to_lobby", {
+    socket.nsp.to("lobby").emit("add_room_to_lobby", {
       code : room.code,
       max_player : room.getMaxPlayers(),
       current_players : room.getAllCurrentPlayers()

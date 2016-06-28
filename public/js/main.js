@@ -67,7 +67,12 @@ $(function () {
     console.info('"user_connection_success" received');
     $(".game-panel").hide();
     $("#room-join-form").show();
-    $("#room-join-code").focus();
+  });
+  
+  socket.on("show_lobby", function (data) {
+    if (data.status == 0) {
+        createHtmlRoom(data.code, data.current_players, data.max_player);
+     }
   });
 
   // Server accepted room creation, show waiting panel
