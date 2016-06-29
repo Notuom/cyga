@@ -106,4 +106,18 @@ GameManager.prototype.playerExists = function playerExists(username) {
   return this.players.indexOf(username) !== -1;
 };
 
+/**
+ * Return all the room created in the games
+ * @returns {Array}
+ */
+GameManager.prototype.getAllRooms = function getAllRooms() {
+  var rooms = [];
+  for (var key in this.rooms) {
+    if (this.rooms.hasOwnProperty(key)) {
+      rooms.push(this.rooms[key]);
+    }
+  }
+  return rooms;
+};
+
 module.exports = GameManager;

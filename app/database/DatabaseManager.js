@@ -5,7 +5,6 @@ pg.defaults.ssl = true;
  * Public methods
  */
 /**
- * GameManager handles rooms within the server.
  * @constructor
  */
 var DatabaseManager = function DatabaseManager() {

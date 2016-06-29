@@ -164,6 +164,27 @@ Room.prototype.allPlayersAnswered = function allPlayersAnswered() {
 };
 
 /**
+ * @returns {Number} get the total number of players within the room
+ */
+Room.prototype.getAllCurrentPlayers = function getAllCurrentPlayers() {
+  return this.players.length;
+};
+
+/**
+ * @returns {Number} get the total number of players within the room
+ */
+Room.prototype.getMaxPlayers = function getMaxPlayers() {
+  return Room.MAX_PLAYERS;
+};
+
+/**
+ * Set the room as active when you start the game
+ */
+Room.prototype.startRounds = function startRounds() {
+  this.status = Room.STATUS_ACTIVE;
+}
+
+/**
  * Returns a list of descriptions for display on client when beginning vote.
  * @returns {string[]} answers for which plaeyers can vote
  */

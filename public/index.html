@@ -29,8 +29,19 @@
 
   <!-- Join room form -->
   <form action="/" method="post" id="room-join-form" class="form game-panel" hidden>
-    <h2>Join a room</h2>
+    <h2>Create a room</h2>
+    <label class="control-label" for="room-create-turns">Number of turns</label>
+    <input class="form-control" type="number" id="room-create-turns" min="10" max="50" value="10">
+    <button type="button" id="room-create" name="room-create" class="btn btn-success"><i class="glyphicon glyphicon-plus
+"></i> Create room
+    </button>
+
+    <h2>LOBBY - Join a room (<span id="number-of-rooms">0</span>)</h2>
     <div class="row">
+      <ul id="room-list" class="list-group">
+      </ul>
+    </div>
+    <!--<div class="row">
       <div class="col-sm-6">
         <input type="text" maxlength="4" id="room-join-code" name="room-join-code" placeholder="CODE" class="form-control">
       </div>
@@ -39,13 +50,7 @@
 "></i> Join room
         </button>
       </div>
-    </div>
-    <h2>Create a room</h2>
-    <label class="control-label" for="room-create-turns">Number of turns</label>
-    <input class="form-control" type="number" id="room-create-turns" min="10" max="50" value="10">
-    <button type="button" id="room-create" name="room-create" class="btn btn-success"><i class="glyphicon glyphicon-plus
-"></i> Create room
-    </button>
+    </div>-->
   </form>
 
   <!-- Waiting room -->

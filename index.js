@@ -43,6 +43,21 @@ io.on('connection', function (socket) {
     if (!manager.playerExists(username)) {
       manager.addPlayer(username);
       socket.player = new Player(username);
+      socket.join("lobby");
+
+      // Create each room in the lobby (HTML)
+      var allRooms = manager.getAllRooms();
+      allRooms.forEach(function(room) {
+        var currentRoom = {
+          status : room.status,
+          code : room.code,
+          current_players : room.getAllCurrentPlayers(),
+          max_player : room.getMaxPlayers()
+        };
+        socket.emit('show_lobby', currentRoom);
+      });
+
+
       socket.emit('user_connection_success');
     }
 
@@ -63,6 +78,14 @@ io.on('connection', function (socket) {
 
     socket.admin = true;
     socket.room = room;
+
+    socket.nsp.to("lobby").emit("add_room_to_lobby", {
+      code : room.code,
+      max_player : room.getMaxPlayers(),
+      current_players : room.getAllCurrentPlayers()
+    });
+
+    socket.leave("lobby");
     socket.join(room.code);
 
     socket.emit("room_waiting_init", {
@@ -98,6 +121,20 @@ io.on('connection', function (socket) {
           });
 
           socket.to(code).emit("room_waiting_update", socket.room.players);
+
+          // Refresh the lobby list
+          socket.nsp.to("lobby").emit('empty_lobby_rooms');
+          var allRooms = manager.getAllRooms();
+          allRooms.forEach(function(room) {
+            var currentRoom = {
+              status : room.status,
+              code : room.code,
+              current_players : room.getAllCurrentPlayers(),
+              max_player : room.getMaxPlayers()
+            };
+            socket.to("lobby").emit('show_lobby', currentRoom);
+          });
+
         }
 
         // Room is started
@@ -127,10 +164,25 @@ io.on('connection', function (socket) {
 
       // Enough players
       if (socket.room.hasMinPlayers() && socket.room.hasMaxPlayers()) {
+        socket.room.startRounds();
         socket.room.nextRound();
 
         // Send round update to all in room
         socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
+
+        // Refresh the lobby list
+        socket.nsp.to("lobby").emit('empty_lobby_rooms');
+        var allRooms = manager.getAllRooms();
+        allRooms.forEach(function(room) {
+          var currentRoom = {
+            status : room.status,
+            code : room.code,
+            current_players : room.getAllCurrentPlayers(),
+            max_player : room.getMaxPlayers()
+          };
+          socket.to("lobby").emit('show_lobby', currentRoom);
+        });
+
       }
 
       // Not enough players / too many (shouldn't happen...)
@@ -210,6 +262,20 @@ io.on('connection', function (socket) {
           console.log("Last player for room with code=" + socket.room.code);
           manager.deleteRoom(socket.room.code);
         }
+
+        // Refresh the lobby list
+        socket.nsp.to("lobby").emit('empty_lobby_rooms');
+        var allRooms = manager.getAllRooms();
+        allRooms.forEach(function(room) {
+          var currentRoom = {
+            status : room.status,
+            code : room.code,
+            current_players : room.getAllCurrentPlayers(),
+            max_player : room.getMaxPlayers()
+          };
+          socket.to("lobby").emit('show_lobby', currentRoom);
+        });
+
       }
     }
   });
