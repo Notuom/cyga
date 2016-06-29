@@ -70,29 +70,31 @@ io.on('connection', function (socket) {
 
   // Create new room
   socket.on('room_create_request', function (turns) {
-    console.log('"room_create_request" received');
+    db.getAcronyms(function(err, result) {
+      if(err) console.log(err);
+      else {
+        tempAcronymArray = [];
+        result.forEach(function (item) {
+          tempAcronymArray.push([item.acronym, item.definition]);
+        });
+        Acronym.appAcronyms = tempAcronymArray;
+        console.log('"room_create_request" received');
 
-    var room = manager.createRoom(turns);
-    room.addPlayer(socket.player);
-    console.log(room);
+        var room = manager.createRoom(turns, result);
+        room.addPlayer(socket.player);
+        console.log(room);
 
-    socket.admin = true;
-    socket.room = room;
+        socket.admin = true;
+        socket.room = room;
+        socket.join(room.code);
 
-    socket.nsp.to("lobby").emit("add_room_to_lobby", {
-      code : room.code,
-      max_player : room.getMaxPlayers(),
-      current_players : room.getAllCurrentPlayers()
-    });
-
-    socket.leave("lobby");
-    socket.join(room.code);
-
-    socket.emit("room_waiting_init", {
-      admin: true,
-      code: room.code,
-      players: room.players,
-      turns: turns
+        socket.emit("room_waiting_init", {
+          admin: true,
+          code: room.code,
+          players: room.players,
+          turns: turns
+        });
+      }
     });
   });
 

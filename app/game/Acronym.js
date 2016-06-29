@@ -20,13 +20,16 @@ Acronym.getRandomAcronyms = function getRandomAcronyms(size) {
     ["HTTP", "Hypertext Transfer Protocol"],
     ["WWF", "World Wide Fund for Nature"]
   ];
+
   var acronymList = [];
   for (var i = 0; i < size; i++) {
-    var randomData = testData[Math.floor(Math.random() * testData.length)];
+    var randomData = this.appAcronyms[Math.floor(Math.random() * this.appAcronyms.length)];
     acronymList.push(new Acronym(randomData[0], randomData[1]));
   }
   return acronymList;
 };
+
+Acronym.appAcronyms = null;
 
 /*
  * Instance fields
