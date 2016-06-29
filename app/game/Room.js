@@ -165,5 +165,11 @@ Room.prototype.getMaxPlayers = function getMaxPlayers() {
   return Room.MAX_PLAYERS;
 };
 
+/**
+ * Set the room as active when you start the game
+ */
+Room.prototype.startRounds = function startRounds() {
+  this.status = Room.STATUS_ACTIVE;
+}
 
 module.exports = Room;

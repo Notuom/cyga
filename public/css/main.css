@@ -1,10 +1,6 @@
 h1 i {
   font-size: 40px;
 }
-#room-join-code {
-  font-family: monospace;
-  text-transform: uppercase;
-}
 
 #room-create, #game-round-submit {
   margin-top: 15px;
@@ -15,9 +11,21 @@ h1 i {
   font-size: 64px;
   text-align: center;
 }
+
+/* Lobby Css */
+#room-list .room-join-code {
+  margin-right: 10px;
+}
+
+.room-join-code {
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
 #room-list li{
   font-size : 14px;
 }
+
 .label-default {
   background-color:#818a91;
 }

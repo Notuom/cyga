@@ -21,12 +21,12 @@ $(function () {
   });
 
   // Join room
-  $("#room-join-form #room-join").click(function (event) {
+  $("#room-join-form").on("click", 'button.room-join', function (event) {
     event.preventDefault();
-    console.info("Sending room_join_request...");
     var t = $(this);
     var code = t.data("room");
     if (code.trim() !== "") {
+      console.info("Sending room_join_request...");
       socket.emit("room_join_request", code);
     } else {
       alert("There is an error with this room, please pick another one.");
@@ -70,8 +70,11 @@ $(function () {
   });
   
   socket.on("show_lobby", function (data) {
+    // Show only room that have not been started
     if (data.status == 0) {
-        createHtmlRoom(data.code, data.current_players, data.max_player);
+        var li = createHtmlRoom(data.code, data.current_players, data.max_player);
+        $("#room-list").append(li);
+        changeNumberofRooms();
      }
   });
 
@@ -91,7 +94,9 @@ $(function () {
   // New room added to lobby
   socket.on("add_room_to_lobby", function (data) {
     console.info('"add_room_to_lobby" received');
-    createHtmlRoom(data.code, data.current_players, data.max_player);
+    var li = createHtmlRoom(data.code, data.current_players, data.max_player);
+    $("#room-list").append(li);
+    changeNumberofRooms();
   });
 
   // New user added  to current room
@@ -134,6 +139,13 @@ $(function () {
     }
   });
 
+  // Empty the Lobby
+  socket.on("empty_lobby_rooms", function() {
+    console.info('"empty_lobby_rooms" receive');
+    $("#room-list").empty();
+    changeNumberofRooms();
+  });
+
   // Receive generic error from server, alert it
   socket.on("generic_error", function (error) {
     console.info('"generic_error" received : ' + error);
@@ -151,7 +163,6 @@ $(function () {
 /*
  * Helper functions
  */
-
 // Rafraichir la liste d'players dans la salle d'attente
 function refreshPlayers(players) {
   $("#room-waiting-players").empty();
@@ -160,17 +171,21 @@ function refreshPlayers(players) {
       .appendTo($("#room-waiting-players"));
   }
 }
+// Modifier le nombre de salle dans la liste
+function changeNumberofRooms() {
+  $("#number-of-rooms").text($("#room-list li").length);
+}
 
 // Create the HTML for the room in lobby
 function createHtmlRoom(code, current, max) {
   var li = $('<li id="'+code+'" class="list-group-item"></li>');
-  var button = $('<button type="button" data-room="'+code+'" id="room-join" name="room-join" class="btn btn-sm btn-success pull-right"></button>');
-  var icon = '<i class="glyphicon glyphicon-plus"></i>';
+  var button = $('<button type="button" data-room="'+code+'" name="room-join" class="room-join btn btn-sm btn-success pull-right"></button>');
+  var icon = '<i class="glyphicon glyphicon-plus"></i> Join this room';
   var roomCode = '<span class="room-join-code">'+code+'</span>';
-  var minPlayer = '<span class="label label-default label-pill pull-xs-right min-players">'+current+'</span>/';
+  var minPlayer = '<span class="label label-default label-pill pull-xs-right min-players">'+current+'</span>  /  ';
   var maxPlayer = '<span class="label label-default label-pill pull-xs-right max-player">'+max+'</span>';
   button.append(icon);
   li.append(roomCode,minPlayer,maxPlayer,button);
-  $("#room-list").append(li);
+  return li;
 }
 
