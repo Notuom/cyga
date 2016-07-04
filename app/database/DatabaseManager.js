@@ -13,6 +13,11 @@ var Acronym = require(__base + 'game/Acronym');
 var DatabaseManager = function DatabaseManager() {
 };
 
+/**
+ * Get an array of Acronym objects and return it through the callback parameter.
+ * @param size number of acronyms to get
+ * @param callback callback with an "acronyms" parameter which is an array of Acronym objects
+ */
 DatabaseManager.prototype.getRandomAcronyms = function getRandomAcronyms(size, callback) {
   var client = new pg.Client(config.databaseUrl);
   client.connect();
