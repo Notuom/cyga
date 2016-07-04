@@ -1,5 +1,8 @@
 SET SCHEMA 'log515_cyga';
 
+TRUNCATE TABLE acronym
+RESTART IDENTITY;
+
 INSERT INTO acronym(acronym, definition)
 VALUES
   ('AA', 'alcooliques anonymes'),
@@ -15,3 +18,5 @@ VALUES
   ('FC', 'forces canadiennes'),
   ('MRC', 'municipalité régionale de comté'),
   ('QG', 'quartier général');
+
+COMMIT;
