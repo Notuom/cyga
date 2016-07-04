@@ -1,5 +1,8 @@
 SET SCHEMA 'log515_cyga';
 
+TRUNCATE TABLE acronym
+RESTART IDENTITY;
+
 INSERT INTO acronym(acronym, definition)
 VALUES
   ('AA', 'alcooliques anonymes'),
@@ -12,6 +15,8 @@ VALUES
   ('PMBOK', 'project management book of knowledge'),
   ('ITIL', 'information technology infrastructure library'),
   ('ARP', 'address resolution protocol'),
-  ('FC', 'focres canadiennes'),
+  ('FC', 'forces canadiennes'),
   ('MRC', 'municipalité régionale de comté'),
   ('QG', 'quartier général');
+
+COMMIT;
