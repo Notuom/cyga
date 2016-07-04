@@ -47,12 +47,12 @@ io.on('connection', function (socket) {
 
       // Create each room in the lobby (HTML)
       var allRooms = manager.getAllRooms();
-      allRooms.forEach(function(room) {
+      allRooms.forEach(function (room) {
         var currentRoom = {
-          status : room.status,
-          code : room.code,
-          current_players : room.getAllCurrentPlayers(),
-          max_player : room.getMaxPlayers()
+          status: room.status,
+          code: room.code,
+          current_players: room.getAllCurrentPlayers(),
+          max_player: room.getMaxPlayers()
         };
         socket.emit('show_lobby', currentRoom);
       });
@@ -70,31 +70,24 @@ io.on('connection', function (socket) {
 
   // Create new room
   socket.on('room_create_request', function (turns) {
-    db.getAcronyms(function(err, result) {
-      if(err) console.log(err);
-      else {
-        tempAcronymArray = [];
-        result.forEach(function (item) {
-          tempAcronymArray.push([item.acronym, item.definition]);
-        });
-        Acronym.appAcronyms = tempAcronymArray;
-        console.log('"room_create_request" received');
+    console.log('"room_create_request" received');
 
-        var room = manager.createRoom(turns, result);
-        room.addPlayer(socket.player);
-        console.log(room);
+    // Get a number of unique random acronyms corresponding to the number of turns from the database
+    db.getRandomAcronyms(turns, function (acronyms) {
+      var room = manager.createRoom(acronyms.length, acronyms);
+      room.addPlayer(socket.player);
+      console.log(room);
 
-        socket.admin = true;
-        socket.room = room;
-        socket.join(room.code);
+      socket.admin = true;
+      socket.room = room;
+      socket.join(room.code);
 
-        socket.emit("room_waiting_init", {
-          admin: true,
-          code: room.code,
-          players: room.players,
-          turns: turns
-        });
-      }
+      socket.emit("room_waiting_init", {
+        admin: true,
+        code: room.code,
+        players: room.players,
+        turns: turns
+      });
     });
   });
 
@@ -127,12 +120,12 @@ io.on('connection', function (socket) {
           // Refresh the lobby list
           socket.nsp.to("lobby").emit('empty_lobby_rooms');
           var allRooms = manager.getAllRooms();
-          allRooms.forEach(function(room) {
+          allRooms.forEach(function (room) {
             var currentRoom = {
-              status : room.status,
-              code : room.code,
-              current_players : room.getAllCurrentPlayers(),
-              max_player : room.getMaxPlayers()
+              status: room.status,
+              code: room.code,
+              current_players: room.getAllCurrentPlayers(),
+              max_player: room.getMaxPlayers()
             };
             socket.to("lobby").emit('show_lobby', currentRoom);
           });
@@ -175,12 +168,12 @@ io.on('connection', function (socket) {
         // Refresh the lobby list
         socket.nsp.to("lobby").emit('empty_lobby_rooms');
         var allRooms = manager.getAllRooms();
-        allRooms.forEach(function(room) {
+        allRooms.forEach(function (room) {
           var currentRoom = {
-            status : room.status,
-            code : room.code,
-            current_players : room.getAllCurrentPlayers(),
-            max_player : room.getMaxPlayers()
+            status: room.status,
+            code: room.code,
+            current_players: room.getAllCurrentPlayers(),
+            max_player: room.getMaxPlayers()
           };
           socket.to("lobby").emit('show_lobby', currentRoom);
         });
@@ -268,16 +261,15 @@ io.on('connection', function (socket) {
         // Refresh the lobby list
         socket.nsp.to("lobby").emit('empty_lobby_rooms');
         var allRooms = manager.getAllRooms();
-        allRooms.forEach(function(room) {
+        allRooms.forEach(function (room) {
           var currentRoom = {
-            status : room.status,
-            code : room.code,
-            current_players : room.getAllCurrentPlayers(),
-            max_player : room.getMaxPlayers()
+            status: room.status,
+            code: room.code,
+            current_players: room.getAllCurrentPlayers(),
+            max_player: room.getMaxPlayers()
           };
           socket.to("lobby").emit('show_lobby', currentRoom);
         });
-
       }
     }
   });

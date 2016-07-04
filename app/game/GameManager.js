@@ -37,7 +37,7 @@ GameManager.prototype.players = null;
 /**
  * Create a new room to manage it.
  */
-GameManager.prototype.createRoom = function createRoom(turns) {
+GameManager.prototype.createRoom = function createRoom(turns, acronyms) {
 
   // Generate a new room code which doesn't exist
   var code;
@@ -47,7 +47,7 @@ GameManager.prototype.createRoom = function createRoom(turns) {
       code += Room.ROOM_CODE_CHARACTERS.charAt(Math.floor(Math.random() * Room.ROOM_CODE_CHARACTERS.length));
     }
   } while (this.roomExists(code));
-  var room = new Room(code, turns);
+  var room = new Room(code, turns, acronyms);
 
   this.rooms[code] = room;
 
