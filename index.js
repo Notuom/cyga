@@ -19,6 +19,9 @@ var manager = new GameManager();
 var DatabaseManager = require(__base + 'database/DatabaseManager');
 var db = new DatabaseManager();
 
+// Routing
+var routes = require(__base + '/routing/routes');
+
 //
 // Static HTTP server
 //
@@ -26,7 +29,7 @@ server.listen(config.port, function () {
   console.log('Server listening on http://localhost:%d/', config.port);
 });
 app.use(express.static(__dirname + '/public'));
-
+app.use('/users',routes);
 //
 // WebSockets server
 //
