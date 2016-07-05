@@ -63,6 +63,7 @@ $(function () {
   $("#btn-replay").click(function (event) {
     event.preventDefault();
     $(".game-panel").hide();
+    $("#game-over-container").hide();
     $("#room-join-form").show();
   });
 

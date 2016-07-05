@@ -219,6 +219,8 @@ io.on('connection', function (socket) {
         var roomSockets = socket.nsp.to(socket.room.code).sockets;
         for (var roomSocket in roomSockets) {
           if (roomSockets.hasOwnProperty(roomSocket)) {
+            roomSockets[roomSocket].player.score = 0;
+            roomSockets[roomSocket].player.gameScore = 0;
             roomSockets[roomSocket].leave(socket.room.code);
           }
         }
