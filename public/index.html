@@ -32,8 +32,9 @@
   <form action="/" method="post" id="room-join-form" class="form game-panel" hidden>
     <h2>Create a room</h2>
     <label class="control-label" for="room-create-turns">Number of turns</label>
-    <input class="form-control" type="number" id="room-create-turns" min="10" max="50" value="10">
-    <button type="button" id="room-create" name="room-create" class="btn btn-success"><i class="glyphicon glyphicon-plus
+    <!-- TODO remettre min. 10 tours, je fais des tests avec 3 -->
+    <input class="form-control" type="number" id="room-create-turns" min="3" max="50" value="10">
+    <button type="submit" id="room-create" name="room-create" class="btn btn-success"><i class="glyphicon glyphicon-plus
 "></i> Create room
     </button>
 
@@ -66,30 +67,42 @@
     <h2>Room <span class="room-code">{{code}}</span></h2>
     <h3>Round <span class="game-round-round">{{round}}</span>/<span class="game-round-turns">{{turns}}</span></h3>
     <h4 class="game-round-acronym">{{acronym}}</h4>
+    <h5 class="game-round-acronym-description"></h5>
 
+    <!-- 1. Description -->
     <div id="game-round-description-container">
       <input type="text" class="form-control" id="game-round-description" placeholder="Enter description...">
-      <button id="game-round-submit" type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-tag"></i> Submit</button>
+      <button id="game-round-submit" type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-tag"></i>
+        Submit
+      </button>
     </div>
-    <div id="game-round-voting-container" class="list-group"></div>
-    <table id="game-round-tally-container" class="table">
+
+    <!-- 2. Vote -->
+    <div id="game-round-voting-container" class="list-group" hidden></div>
+
+    <!-- 3. Tally (score board) -->
+    <table id="game-round-tally-container" class="table" hidden>
       <thead>
-        <tr>
-          <td>Player</td>
-          <td>Answer</td>
-          <td>Votes</td>
-          <td>Score</td>
-        </tr>
+      <tr>
+        <th>Player</th>
+        <th>Answer</th>
+        <th>Votes</th>
+        <th>Score</th>
+      </tr>
       </thead>
       <tbody id="game-round-tally"></tbody>
     </table>
+
+    <!-- 4. Game Over -->
+    <div id="game-over-container" hidden>
+      <h4>Game over!</h4>
+      <h5>Winner: <span id="game-over-winner"></span></h5>
+      <button id="btn-replay" class="btn btn-primary"><i class="glyphicon glyphicon-repeat"></i> Play again</button>
+    </div>
   </form>
 
   <!-- Admin panel -->
-  <div id="admin-panel" class="panel side-panel" hidden>
-
-  </div>
-
+  <div id="admin-panel" class="panel side-panel" hidden></div>
 
   <!-- Disconnect message panel -->
   <div id="disconnect-panel" class="panel panel-danger" hidden>

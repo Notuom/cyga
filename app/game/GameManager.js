@@ -107,6 +107,24 @@ GameManager.prototype.playerExists = function playerExists(username) {
 };
 
 /**
+ * Refresh the lobby list with currently active games. Must be called when a game is created or deleted.
+ * @param socket
+ */
+GameManager.prototype.refreshLobby = function refreshLobby(socket) {
+  socket.nsp.to("lobby").emit('empty_lobby_rooms');
+  var allRooms = this.getAllRooms();
+  allRooms.forEach(function (room) {
+    var currentRoom = {
+      status: room.status,
+      code: room.code,
+      current_players: room.getAllCurrentPlayers(),
+      max_player: room.getMaxPlayers()
+    };
+    socket.to("lobby").emit('show_lobby', currentRoom);
+  });
+};
+
+/**
  * Return all the room created in the games
  * @returns {Array}
  */

@@ -248,4 +248,11 @@ Room.prototype.getTally = function getTally() {
   });
 };
 
+/**
+ * @returns {boolean} true if game is ended (nextRound has been called and rounds exceed maximum turns)
+ */
+Room.prototype.isGameEnded = function isGameEnded() {
+  return this.round > this.turns;
+}
+
 module.exports = Room;

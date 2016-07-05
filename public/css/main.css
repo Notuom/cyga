@@ -12,6 +12,10 @@ h1 i {
   text-align: center;
 }
 
+.game-round-acronym-description {
+  text-align: center;
+}
+
 /* Lobby Css */
 #room-list .room-join-code {
   margin-right: 10px;
@@ -28,4 +32,12 @@ h1 i {
 
 .label-default {
   background-color:#818a91;
+}
+
+.winner-icon {
+  margin-right: 5px;
+}
+
+#game-over-container {
+  text-align: center;
 }
