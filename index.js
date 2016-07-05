@@ -80,6 +80,14 @@ io.on('connection', function (socket) {
 
       socket.admin = true;
       socket.room = room;
+
+      socket.nsp.to("lobby").emit("add_room_to_lobby", {
+        code : room.code,
+        max_player : room.getMaxPlayers(),
+        current_players : room.getAllCurrentPlayers()
+      });
+
+      socket.leave("lobby");
       socket.join(room.code);
 
       socket.emit("room_waiting_init", {
