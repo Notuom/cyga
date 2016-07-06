@@ -5,7 +5,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/login', function(req, res) {
-    res.send('login page');
+    res.render('index', { title: 'Hey', message: 'Hello there!'});
 });
 
 router.get('/account', function(req, res) {

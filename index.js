@@ -30,6 +30,10 @@ server.listen(config.port, function () {
 });
 app.use(express.static(__dirname + '/public'));
 app.use('/users',routes);
+
+app.set('views', __base + 'views/');
+app.set('view engine', 'pug');
+
 //
 // WebSockets server
 //
