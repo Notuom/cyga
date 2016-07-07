@@ -4,11 +4,11 @@ var Acronym = require(__base + "game/Acronym");
  * Room in which a game is played. Keeps information about an upcoming or ongoing game session.
  * @constructor
  */
-var Room = function Room(code, turns) {
+var Room = function Room(code, turns, acronyms) {
   this.code = code;
   this.turns = turns;
   this.players = [];
-  this.acronyms = Acronym.getRandomAcronyms(turns);
+  this.acronyms = acronyms;
 };
 
 /*
@@ -182,7 +182,7 @@ Room.prototype.getMaxPlayers = function getMaxPlayers() {
  */
 Room.prototype.startRounds = function startRounds() {
   this.status = Room.STATUS_ACTIVE;
-}
+};
 
 /**
  * Returns a list of descriptions for display on client when beginning vote.
@@ -247,5 +247,12 @@ Room.prototype.getTally = function getTally() {
     };
   });
 };
+
+/**
+ * @returns {boolean} true if game is ended (nextRound has been called and rounds exceed maximum turns)
+ */
+Room.prototype.isGameEnded = function isGameEnded() {
+  return this.round > this.turns;
+}
 
 module.exports = Room;

@@ -6,30 +6,6 @@ var Acronym = function Acronym(name, description) {
   this.name = name;
   this.description = description;
 };
-/*
- * Static methods
- */
-/**
- * Create a random acronyms list from the database
- * TODO: Implement database instead of local stuff.
- * @returns {Acronym[]}
- */
-Acronym.getRandomAcronyms = function getRandomAcronyms(size) {
-  var testData = [
-    ["WTF", "What the fuck"],
-    ["HTTP", "Hypertext Transfer Protocol"],
-    ["WWF", "World Wide Fund for Nature"]
-  ];
-
-  var acronymList = [];
-  for (var i = 0; i < size; i++) {
-    var randomData = this.appAcronyms[Math.floor(Math.random() * this.appAcronyms.length)];
-    acronymList.push(new Acronym(randomData[0], randomData[1]));
-  }
-  return acronymList;
-};
-
-Acronym.appAcronyms = null;
 
 /*
  * Instance fields

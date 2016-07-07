@@ -37,7 +37,7 @@ GameManager.prototype.players = null;
 /**
  * Create a new room to manage it.
  */
-GameManager.prototype.createRoom = function createRoom(turns) {
+GameManager.prototype.createRoom = function createRoom(turns, acronyms) {
 
   // Generate a new room code which doesn't exist
   var code;
@@ -47,7 +47,7 @@ GameManager.prototype.createRoom = function createRoom(turns) {
       code += Room.ROOM_CODE_CHARACTERS.charAt(Math.floor(Math.random() * Room.ROOM_CODE_CHARACTERS.length));
     }
   } while (this.roomExists(code));
-  var room = new Room(code, turns);
+  var room = new Room(code, turns, acronyms);
 
   this.rooms[code] = room;
 
@@ -104,6 +104,24 @@ GameManager.prototype.removePlayer = function removePlayer(username) {
  */
 GameManager.prototype.playerExists = function playerExists(username) {
   return this.players.indexOf(username) !== -1;
+};
+
+/**
+ * Refresh the lobby list with currently active games. Must be called when a game is created or deleted.
+ * @param socket
+ */
+GameManager.prototype.refreshLobby = function refreshLobby(socket) {
+  socket.nsp.to("lobby").emit('empty_lobby_rooms');
+  var allRooms = this.getAllRooms();
+  allRooms.forEach(function (room) {
+    var currentRoom = {
+      status: room.status,
+      code: room.code,
+      current_players: room.getAllCurrentPlayers(),
+      max_player: room.getMaxPlayers()
+    };
+    socket.to("lobby").emit('show_lobby', currentRoom);
+  });
 };
 
 /**

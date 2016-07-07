@@ -34,7 +34,7 @@ $(function () {
   });
 
   // Create new room
-  $("#room-create").click(function (event) {
+  $("#room-join-form").submit(function (event) {
     event.preventDefault();
     console.info("Sending room_create_request...");
 
@@ -59,6 +59,14 @@ $(function () {
     socket.emit("room_round_description", answer);
   });
 
+  // Replay
+  $("#btn-replay").click(function (event) {
+    event.preventDefault();
+    $(".game-panel").hide();
+    $("#game-over-container").hide();
+    $("#room-join-form").show();
+  });
+
   /*
    * WebSockets listeners
    */
@@ -68,14 +76,15 @@ $(function () {
     $(".game-panel").hide();
     $("#room-join-form").show();
   });
-  
+
+  // Receive a room for showing in the lobby
   socket.on("show_lobby", function (data) {
     // Show only room that have not been started
     if (data.status == 0) {
-        var li = createHtmlRoom(data.code, data.current_players, data.max_player);
-        $("#room-list").append(li);
-        changeNumberofRooms();
-     }
+      var li = createHtmlRoom(data.code, data.current_players, data.max_player);
+      $("#room-list").append(li);
+      changeNumberofRooms();
+    }
   });
 
   // Server accepted room creation, show waiting panel
@@ -108,7 +117,7 @@ $(function () {
   // Start new game round
   socket.on("room_start_round", function (data) {
     console.info('"room_start_round" received');
-    $("#game-round-tally-container, .game-panel").hide();
+    $("#game-round-tally-container, .game-panel, .game-round-acronym-description").hide();
 
     $(".game-round-round").text(data.round);
     $(".game-round-acronym").text(data.acronym);
@@ -143,23 +152,17 @@ $(function () {
   });
 
   // Show tally
-  socket.on("room_show_tally", function (tally) {
-    $("#game-round-voting-container").hide();
-    $("#game-round-tally-container").show();
-    var container$ = $("#game-round-tally");
-    container$.empty();
-    for (var i = 0; i < tally.length; i++) {
-      var tr$ = $('<tr></tr>');
-      tr$.append('<td>' + tally[i].username + '</td>');
-      tr$.append('<td>' + tally[i].answer + '</td>');
-      tr$.append('<td>' + tally[i].roundScore + '</td>');
-      tr$.append('<td>' + tally[i].gameScore + '</td>');
-      tr$.appendTo(container$);
-    }
+  socket.on("room_show_tally", function (tally, description) {
+    showTally(tally, description, false);
+  });
+
+  // Game is over: show final tally, declare winner
+  socket.on("room_end", function (tally, description) {
+    showTally(tally, description, true);
   });
 
   // Empty the Lobby
-  socket.on("empty_lobby_rooms", function() {
+  socket.on("empty_lobby_rooms", function () {
     console.info('"empty_lobby_rooms" receive');
     $("#room-list").empty();
     changeNumberofRooms();
@@ -197,14 +200,57 @@ function changeNumberofRooms() {
 
 // Create the HTML for the room in lobby
 function createHtmlRoom(code, current, max) {
-  var li = $('<li id="'+code+'" class="list-group-item"></li>');
-  var button = $('<button type="button" data-room="'+code+'" name="room-join" class="room-join btn btn-sm btn-success pull-right"></button>');
-  var icon = '<i class="glyphicon glyphicon-plus"></i> Join this room';
-  var roomCode = '<span class="room-join-code">'+code+'</span>';
-  var minPlayer = '<span class="label label-default label-pill pull-xs-right min-players">'+current+'</span>  /  ';
-  var maxPlayer = '<span class="label label-default label-pill pull-xs-right max-player">'+max+'</span>';
+  var li = $('<li id="' + code + '" class="list-group-item"></li>');
+  var button = $('<button type="button" data-room="' + code + '" name="room-join" class="room-join btn btn-sm btn-success pull-right"></button>');
+  var icon = '<i class="glyphicon glyphicon-arrow-right"></i> Join this room';
+  var roomCode = '<span class="room-join-code">' + code + '</span>';
+  var minPlayer = '<span class="label label-default label-pill pull-xs-right min-players">' + current + '</span>  /  ';
+  var maxPlayer = '<span class="label label-default label-pill pull-xs-right max-player">' + max + '</span>';
   button.append(icon);
-  li.append(roomCode,minPlayer,maxPlayer,button);
+  li.append(roomCode, minPlayer, maxPlayer, button);
   return li;
 }
 
+// Show room tally after round or when game is over
+function showTally(tally, description, isGameOver) {
+  $(".game-round-acronym-description").text(description).show();
+  $("#game-round-voting-container").hide();
+  $("#game-round-tally-container").show();
+  var container$ = $("#game-round-tally");
+  container$.empty();
+
+  // Sort by score
+  tally.sort(function (a, b) {
+    return a.gameScore < b.gameScore;
+  });
+
+  // Display scores
+  for (var i = 0; i < tally.length; i++) {
+    var tr$ = $('<tr></tr>').data("tally", tally[i]);
+    tr$.append('<td>' + tally[i].username + '</td>');
+    tr$.append('<td>' + tally[i].answer + '</td>');
+    tr$.append('<td>' + tally[i].roundScore + '</td>');
+    tr$.append('<td>' + tally[i].gameScore + '</td>');
+    tr$.appendTo(container$);
+  }
+
+  if (isGameOver) {
+
+    // Find which element has max score
+    var max$;
+    container$.find("tr").each(function () {
+      if (typeof max$ === "undefined") {
+        max$ = $(this);
+      } else if ($(this).data("tally").gameScore > max$.gameScore) {
+        max$ = $(this);
+      }
+    });
+
+    // Assign a nice star icon to the winner
+    max$.find("td").eq(0).prepend('<i class="glyphicon glyphicon-star winner-icon"></i>');
+
+    // Show their glorious name under the game-over prompt
+    $("#game-over-container").show();
+    $("#game-over-winner").text(max$.data("tally").username);
+  }
+}

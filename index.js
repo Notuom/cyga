@@ -27,7 +27,6 @@ server.listen(config.port, function () {
 });
 app.use(express.static(__dirname + '/public'));
 
-
 //
 // WebSockets server
 //
@@ -47,16 +46,15 @@ io.on('connection', function (socket) {
 
       // Create each room in the lobby (HTML)
       var allRooms = manager.getAllRooms();
-      allRooms.forEach(function(room) {
+      allRooms.forEach(function (room) {
         var currentRoom = {
-          status : room.status,
-          code : room.code,
-          current_players : room.getAllCurrentPlayers(),
-          max_player : room.getMaxPlayers()
+          status: room.status,
+          code: room.code,
+          current_players: room.getAllCurrentPlayers(),
+          max_player: room.getMaxPlayers()
         };
         socket.emit('show_lobby', currentRoom);
       });
-
 
       socket.emit('user_connection_success');
     }
@@ -70,31 +68,31 @@ io.on('connection', function (socket) {
 
   // Create new room
   socket.on('room_create_request', function (turns) {
-    db.getAcronyms(function(err, result) {
-      if(err) console.log(err);
-      else {
-        tempAcronymArray = [];
-        result.forEach(function (item) {
-          tempAcronymArray.push([item.acronym, item.definition]);
-        });
-        Acronym.appAcronyms = tempAcronymArray;
-        console.log('"room_create_request" received');
+    console.log('"room_create_request" received');
 
-        var room = manager.createRoom(turns, result);
-        room.addPlayer(socket.player);
-        console.log(room);
+    // Get a number of unique random acronyms corresponding to the number of turns from the database
+    db.getRandomAcronyms(turns, function (acronyms) {
+      var room = manager.createRoom(acronyms.length, acronyms);
+      room.addPlayer(socket.player);
+      console.log(room);
 
-        socket.admin = true;
-        socket.room = room;
-        socket.join(room.code);
+      socket.admin = true;
+      socket.room = room;
 
-        socket.emit("room_waiting_init", {
-          admin: true,
-          code: room.code,
-          players: room.players,
-          turns: turns
-        });
-      }
+      socket.nsp.to("lobby").emit("add_room_to_lobby", {
+        code: room.code,
+        max_player: room.getMaxPlayers(),
+        current_players: room.getAllCurrentPlayers()
+      });
+
+      socket.join(room.code);
+
+      socket.emit("room_waiting_init", {
+        admin: true,
+        code: room.code,
+        players: room.players,
+        turns: turns
+      });
     });
   });
 
@@ -125,18 +123,7 @@ io.on('connection', function (socket) {
           socket.to(code).emit("room_waiting_update", socket.room.players);
 
           // Refresh the lobby list
-          socket.nsp.to("lobby").emit('empty_lobby_rooms');
-          var allRooms = manager.getAllRooms();
-          allRooms.forEach(function(room) {
-            var currentRoom = {
-              status : room.status,
-              code : room.code,
-              current_players : room.getAllCurrentPlayers(),
-              max_player : room.getMaxPlayers()
-            };
-            socket.to("lobby").emit('show_lobby', currentRoom);
-          });
-
+          manager.refreshLobby(socket);
         }
 
         // Room is started
@@ -173,18 +160,7 @@ io.on('connection', function (socket) {
         socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
 
         // Refresh the lobby list
-        socket.nsp.to("lobby").emit('empty_lobby_rooms');
-        var allRooms = manager.getAllRooms();
-        allRooms.forEach(function(room) {
-          var currentRoom = {
-            status : room.status,
-            code : room.code,
-            current_players : room.getAllCurrentPlayers(),
-            max_player : room.getMaxPlayers()
-          };
-          socket.to("lobby").emit('show_lobby', currentRoom);
-        });
-
+        manager.refreshLobby(socket);
       }
 
       // Not enough players / too many (shouldn't happen...)
@@ -222,18 +198,49 @@ io.on('connection', function (socket) {
     // Add player score
     socket.room.addVoteForAnswer(vote);
 
+    // If this is the last player to vote on this round
     if (socket.room.allPlayersVoted()) {
 
-      // Send tally to client
-      socket.nsp.to(socket.room.code).emit("room_show_tally", socket.room.getTally());
+      // Compute tally for this round
+      var tally = socket.room.getTally();
+      var description = socket.room.acronym.description;
 
       // Reset player answers and votes for next round
       socket.room.nextRound();
 
-      // Set a time out for when the tally should stop being shown
-      setTimeout(function timeoutRoomTally() {
-        socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
-      }, GameManager.TALLY_DISPLAY_DELAY);
+      // Game is ended: send message to show that was the last round, delete room
+      if (socket.room.isGameEnded()) {
+
+        // Send tally while also indicating the game has ended
+        socket.nsp.to(socket.room.code).emit("room_end", tally, description);
+
+        // Make all clients leave room
+        console.log(socket.nsp.to(socket.room.code));
+        var roomSockets = socket.nsp.to(socket.room.code).sockets;
+        for (var roomSocket in roomSockets) {
+          if (roomSockets.hasOwnProperty(roomSocket)) {
+            roomSockets[roomSocket].player.score = 0;
+            roomSockets[roomSocket].player.gameScore = 0;
+            roomSockets[roomSocket].leave(socket.room.code);
+          }
+        }
+
+        // Delete room from game manager
+        manager.deleteRoom(socket.room.code);
+        manager.refreshLobby(socket);
+      }
+
+      // Game is not ended: send message to show tally and set a timeout to begin next round
+      else {
+        // Send tally to client
+        // TODO send real description too
+        socket.nsp.to(socket.room.code).emit("room_show_tally", tally, description);
+
+        // Set a time out for when the tally should stop being shown
+        setTimeout(function timeoutRoomTally() {
+          socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
+        }, GameManager.TALLY_DISPLAY_DELAY);
+      }
     }
   });
 
@@ -266,18 +273,7 @@ io.on('connection', function (socket) {
         }
 
         // Refresh the lobby list
-        socket.nsp.to("lobby").emit('empty_lobby_rooms');
-        var allRooms = manager.getAllRooms();
-        allRooms.forEach(function(room) {
-          var currentRoom = {
-            status : room.status,
-            code : room.code,
-            current_players : room.getAllCurrentPlayers(),
-            max_player : room.getMaxPlayers()
-          };
-          socket.to("lobby").emit('show_lobby', currentRoom);
-        });
-
+        manager.refreshLobby(socket);
       }
     }
   });
