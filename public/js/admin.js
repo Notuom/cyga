@@ -5,8 +5,8 @@ $(function () {
   var updates= [];
 
   $('#update-acronyms').on('click', function() {
-    console.log(updates);
     socket.emit('update_acronyms', updates);
+    $('#reload-page-form').submit();
   });
 
   $('.delete-acronym').on('click', function() {
