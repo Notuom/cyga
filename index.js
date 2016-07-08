@@ -3,6 +3,7 @@ global.__base = __dirname + '/app/';
 var config = require(__base + 'config');
 var express = require('express');
 var app = express();
+var router = express.Router();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
@@ -21,6 +22,7 @@ var db = new DatabaseManager();
 
 // Routing
 var accountRoutes = require(__base + '/routing/accountRoutes');
+var adminRoutes = require(__base + '/routing/adminRoutes');
 
 //
 // Static HTTP server
@@ -30,6 +32,7 @@ server.listen(config.port, function () {
 });
 app.use(express.static(__dirname + '/public'));
 app.use('/users',accountRoutes);
+app.use('/admin',adminRoutes);
 
 app.set('views', __base + 'views/');
 app.set('view engine', 'pug');
@@ -283,5 +286,28 @@ io.on('connection', function (socket) {
         manager.refreshLobby(socket);
       }
     }
+  });
+
+  //Update database to reflect acronym modifications
+  socket.on('update_acronyms', function(acronyms) {
+    deleteArray = [];
+    insertArray = [];
+    updateArray = [];
+    for(i = 0 ; i < acronyms.length ; i++) {
+      switch (acronyms[i][0]) {
+        case 'UPDATE':
+          updateArray.push([acronyms[i][1],acronyms[i][2]]);
+          break;
+        case 'INSERT':
+          insertArray.push([acronyms[i][1],acronyms[i][2]]);
+          break;
+        case 'DELETE':
+          deleteArray.push(acronyms[i][1]);
+          break;
+      }
+    }
+    if(insertArray.length > 0)db.insertAcronyms(insertArray);
+    if(updateArray.length > 0)db.updateAcronyms(updateArray);
+    if(deleteArray.length > 0)db.deleteAcronyms(deleteArray);
   });
 });

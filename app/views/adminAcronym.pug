@@ -1,0 +1,55 @@
+extends ./layout.pug
+
+block title
+  title Acronym Edition
+
+block content
+  div.container#adminAcronymEdit
+    h1
+      i.glyphicon.glyphicon-wrench
+      abbr(title='Acronym Edition') AE
+    div.row
+      div.col-xs-12
+        div.table-responsive
+          table(class='table' style='max-height:500px;')
+            thead
+              tr
+                th(width='10%') Acronym
+                th Definition
+                th
+                th
+            tbody
+              each acronym, i in acronyms
+                tr(id=acronym.id)
+                  td(width='10%').acronym-name #{acronym.name}
+                  td.acronym-definition #{acronym.description}
+                  td(width='5%')
+                    i.edit-acronym.glyphicon.glyphicon-edit
+                  td(width='5%')
+                    i.delete-acronym.glyphicon.glyphicon-remove
+    div.row.component-row
+      div.col-xs-12.col-sm-2
+        button#update-acronyms.btn.btn-primary
+          echo Sauvegarder
+      div.col-xs-12.col-sm-2
+        button#add-acronym.btn.btn-primary
+          echo Ajouter
+    div#acronym-edit-panel.panel.panel-default
+      div.panel-heading
+        echo Ajouter un acronyme
+      div.panel-body
+        form#acronym-changes-form
+          input(type="hidden" value="")#edit-acronym-action
+          input(type="hidden" value="")#edit-acronym-id
+          div.row.component-row
+            div.col-xs-12
+              input(type='text' name='acronyme' placeholder='Acronyme' required)#edit-acronym-input.full-width
+            div.col-xs-12
+              input(type='text' name='definition' placeholder='Définition' required)#edit-definition-input.full-width
+            div.col-xs-12
+              input(type='submit' value='Sauvegarder')#save-acronym-changes.btn.btn-primary.full-width
+            div.col-xs-12
+              button#cancel-acronym-changes.btn.btn-primary.full-width
+                echo Annuler
+block footer
+  script(src='../../js/admin.js')
