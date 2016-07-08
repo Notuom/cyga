@@ -1,5 +1,13 @@
-html
-  head
-    title!= title
-  body
-    h1!= message
+extends ./layout.pug
+
+block title
+    title Login Page
+
+block content
+    form.form-signin
+        h2.form-signin-heading Login
+        label(class='sr-only',for='inputEmail') Email Address
+        input(type='email',id='inputEmail',class='form-control',placeholder='Email address', required, autofocus)
+        label(class='sr-only', for='inputPassword') Password
+        input(type='password',id='inputPassword',class='form-control',placeholder='Password', required, autofocus)
+        input(type='submit',class='btn btn-lg btn-primary btn-block',placeholder='Password', required, autofocus)
