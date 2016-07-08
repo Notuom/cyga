@@ -1,3 +1,4 @@
+/* Game Css */
 h1 i {
   font-size: 40px;
 }
@@ -15,6 +16,15 @@ h1 i {
 .game-round-acronym-description {
   text-align: center;
 }
+
+.winner-icon {
+  margin-right: 5px;
+}
+
+#game-over-container {
+  text-align: center;
+}
+
 
 /* Lobby Css */
 #room-list .room-join-code {
@@ -34,10 +44,8 @@ h1 i {
   background-color:#818a91;
 }
 
-.winner-icon {
-  margin-right: 5px;
-}
-
-#game-over-container {
-  text-align: center;
+/* Login Css */
+#login {
+  width : 780px;
+  margin : 0 auto;
 }
