@@ -4,10 +4,16 @@ block title
     title Login Page
 
 block content
-    form.form-signin
+    form.form-horizontal
         h2.form-signin-heading Login
-        label(class='sr-only',for='inputEmail') Email Address
-        input(type='email',id='inputEmail',class='form-control',placeholder='Email address', required, autofocus)
-        label(class='sr-only', for='inputPassword') Password
-        input(type='password',id='inputPassword',class='form-control',placeholder='Password', required, autofocus)
-        input(type='submit',class='btn btn-lg btn-primary btn-block',placeholder='Password', required, autofocus)
+        .form-group
+            label(class='col-sm-2 control-label',for='inputEmail') Email Address
+            .col-sm-10
+                input(type='email',id='inputEmail',class='form-control',placeholder='Email address', required, autofocus)
+        .form-group
+            label(class='col-sm-2 control-label', for='inputPassword') Password
+            .col-sm-10
+                input(type='password',id='inputPassword',class='form-control',placeholder='Password', required, autofocus)
+        .form-group
+            div(class='col-sm-offset-2 col-sm-10')
+                input(type='submit',class='btn btn-lg btn-primary btn-block', value='Sign In', required, autofocus)
