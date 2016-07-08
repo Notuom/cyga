@@ -121,7 +121,11 @@ io.on('connection', function (socket) {
           });
 
           socket.to(code).emit("room_waiting_update", socket.room.players);
-
+		  
+		  //Auto-start a game if room is full
+		  if ( socket.room.players.length == socket.room.getMaxPlayers() ) {
+		    startRoom(socket);
+		  }
           // Refresh the lobby list
           manager.refreshLobby(socket);
         }
@@ -145,35 +149,8 @@ io.on('connection', function (socket) {
   });
 
   // Start 1st game round
-  socket.on('room_start_request', function () {
-    console.log('"room_start_request" received');
-
-    // Player is admin
-    if (socket.admin) {
-
-      // Enough players
-      if (socket.room.hasMinPlayers() && socket.room.hasMaxPlayers()) {
-        socket.room.startRounds();
-        socket.room.nextRound();
-
-        // Send round update to all in room
-        socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
-
-        // Refresh the lobby list
-        manager.refreshLobby(socket);
-      }
-
-      // Not enough players / too many (shouldn't happen...)
-      else {
-        socket.emit("generic_error", "The number of players in the room has to be between " +
-          Room.MIN_PLAYERS + " and " + Room.MAX_PLAYERS + ".");
-      }
-    }
-
-    // Player is not admin
-    else {
-      socket.emit("generic_error", "Only the host can start the game.");
-    }
+  socket.on('room_start_request', function(){
+	startRoom(socket);
   });
 
   // Receive description from player
@@ -278,3 +255,34 @@ io.on('connection', function (socket) {
     }
   });
 });
+
+function startRoom(socket) {
+    console.log('"room_start_request" received');
+
+    // Player is admin
+    if (socket.admin || socket.room.players.length == socket.room.getMaxPlayers()) {
+
+      // Enough players
+      if (socket.room.hasMinPlayers() && socket.room.hasMaxPlayers()) {
+        socket.room.startRounds();
+        socket.room.nextRound();
+		
+        // Send round update to all in room
+        socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
+
+        // Refresh the lobby list
+        manager.refreshLobby(socket);
+      }
+
+      // Not enough players / too many (shouldn't happen...)
+      else {
+        socket.emit("generic_error", "The number of players in the room has to be between " +
+          Room.MIN_PLAYERS + " and " + Room.MAX_PLAYERS + ".");
+      }
+    }
+
+    // Player is not admin
+    else {
+      socket.emit("generic_error", "Only the host can start the game.");
+    }
+  }
