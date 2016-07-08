@@ -1,20 +1,24 @@
 extends ./layout.pug
 
 block title
-    title Login Page
+    title Account Page
 
 block content
-    #login(method='post', action='/users/login')
-        form.form-horizontal
+    #signup
+        form.form-horizontal()
             h2.form-signin-heading Login
             .form-group
                 label(class='col-sm-2 control-label',for='inputEmail') Email Address
                 .col-sm-10
-                    input(type='email',id='inputEmail',class='form-control',placeholder='Email address', required)
+                    input(type='email',id='inputEmail',class='form-control',placeholder='Email address', required, autofocus)
+            .form-group
+                label(class='col-sm-2 control-label',for='inputUsername') Username
+                .col-sm-10
+                    input(type='text',id='inputUsername',class='form-control',placeholder='Username', required)
             .form-group
                 label(class='col-sm-2 control-label', for='inputPassword') Password
                 .col-sm-10
                     input(type='password',id='inputPassword',class='form-control',placeholder='Password', required)
             .form-group
                 div(class='col-sm-offset-2 col-sm-10')
-                    input(type='submit',class='btn btn-lg btn-primary btn-block', value='Sign In')
+                    input(type='submit',class='btn btn-lg btn-primary btn-block', value='Sign Up')

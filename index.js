@@ -22,18 +22,51 @@ var db = new DatabaseManager();
 // Routing
 var accountRoutes = require(__base + '/routing/accountRoutes');
 
+// Session + Login
+var session = require('express-session');
+var passport = require('passport');
+var LocalStrategy = require('passport-local');
+var loginHelper = require(__base + 'helper/loginHelper');
+
 //
 // Static HTTP server
 //
 server.listen(config.port, function () {
   console.log('Server listening on http://localhost:%d/', config.port);
 });
-app.use(express.static(__dirname + '/public'));
-app.use('/users',accountRoutes);
+
+// Session and login
+app.use(session({secret: 'test', saveUninitialized: true, resave: true}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Session-persisted message middleware
+app.use(function(req, res, next){
+  var err = req.session.error,
+      msg = req.session.notice,
+      success = req.session.success;
+
+  delete req.session.error;
+  delete req.session.success;
+  delete req.session.notice;
+
+  if (err) res.locals.error = err;
+  if (msg) res.locals.notice = msg;
+  if (success) res.locals.success = success;
+
+  next();
+});
 
 app.set('views', __base + 'views/');
 app.set('view engine', 'pug');
 
+// Routes
+app.use(express.static(__dirname + '/public'));
+app.use('/users',accountRoutes);
+
+//========================= Passport Strategy ===============================
+
+//===========================================================================
 //
 // WebSockets server
 //
