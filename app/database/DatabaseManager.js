@@ -43,7 +43,7 @@ DatabaseManager.prototype.getRandomAcronyms = function getRandomAcronyms(size, c
  */
 DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
   query.first('SELECT username FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
-    return result.length == 0;
+    return (result && result.length == 0);
   });
 };
 

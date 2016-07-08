@@ -45,7 +45,7 @@ h1 i {
 }
 
 /* Login Css */
-#login {
+#login, #signup {
   width : 780px;
   margin : 0 auto;
 }
