@@ -144,7 +144,8 @@ var gameSockets = function gameSockets(socket) {
     if (socket.room.allPlayersAnswered()) {
 
       // Send voting start with all player descriptions.
-      socket.nsp.to(socket.room.code).emit("room_start_vote", socket.room.getPlayerDescriptions());
+      console.log("All players answered for room with code=" + socket.room.code);
+      startVote(socket);
     }
   });
 
@@ -158,46 +159,7 @@ var gameSockets = function gameSockets(socket) {
 
     // If this is the last player to vote on this round
     if (socket.room.allPlayersVoted()) {
-
-      // Compute tally for this round
-      var tally = socket.room.getTally();
-      var description = socket.room.acronym.description;
-
-      // Reset player answers and votes for next round
-      socket.room.nextRound();
-
-      // Game is ended: send message to show that was the last round, delete room
-      if (socket.room.isGameEnded()) {
-
-        // Send tally while also indicating the game has ended
-        socket.nsp.to(socket.room.code).emit("room_end", tally, description);
-
-        // Make all clients leave room
-        console.log(socket.nsp.to(socket.room.code));
-        var roomSockets = socket.nsp.to(socket.room.code).sockets;
-        for (var roomSocket in roomSockets) {
-          if (roomSockets.hasOwnProperty(roomSocket)) {
-            roomSockets[roomSocket].player.score = 0;
-            roomSockets[roomSocket].player.gameScore = 0;
-            roomSockets[roomSocket].leave(socket.room.code);
-          }
-        }
-
-        // Delete room from game manager
-        manager.deleteRoom(socket.room.code);
-        manager.refreshLobby(socket);
-      }
-
-      // Game is not ended: send message to show tally and set a timeout to begin next round
-      else {
-        // Send tally to client
-        socket.nsp.to(socket.room.code).emit("room_show_tally", tally, description);
-
-        // Set a time out for when the tally should stop being shown
-        setTimeout(function timeoutRoomTally() {
-          socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
-        }, GameManager.TALLY_DISPLAY_DELAY);
-      }
+      endVoting(socket);
     }
   });
 
@@ -236,6 +198,10 @@ var gameSockets = function gameSockets(socket) {
   });
 };
 
+/**
+ * Start a room when the host decides to start or when the maximum number of players have joined.
+ * @param socket socket.io socket instance
+ */
 function startRoom(socket) {
   console.log('"room_start_request" received');
 
@@ -248,7 +214,7 @@ function startRoom(socket) {
       socket.room.nextRound();
 
       // Send round update to all in room
-      socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
+      startRound(socket);
 
       // Refresh the lobby list
       manager.refreshLobby(socket);
@@ -267,4 +233,81 @@ function startRoom(socket) {
   }
 }
 
+/**
+ * Start the room's current round and keep a timeout for the round's time limit
+ * @param socket socket.io socket instance
+ */
+function startRound(socket) {
+  socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
+  socket.room.startTimeout(function roomDescriptionTimeout() {
+    console.log("Description timeout expired for room with code=" + socket.room.code);
+    startVote(socket);
+  });
+}
+
+/**
+ * Start the voting phase for a room when timeout expires or all players have descriptions
+ * @param socket socket.io socket instance
+ */
+function startVote(socket) {
+  var descriptions = socket.room.getPlayerDescriptions();
+
+  // Descriptions have been entered, show voting screen
+  if (descriptions.length > 0) {
+    socket.nsp.to(socket.room.code).emit("room_start_vote", descriptions);
+  }
+
+  // No descriptions entered - come on lazy players! show tally directly.
+  else {
+    console.log("No description found in round, skip voting for room with code=" + socket.room.code);
+    endVoting(socket);
+  }
+}
+
+/**
+ * End voting phase when all players have voted
+ @param socket socket.io socket instance
+ */
+function endVoting(socket) {
+
+  // Compute tally for this round
+  var tally = socket.room.getTally();
+  var description = socket.room.acronym.description;
+
+  // Reset player answers and votes for next round
+  socket.room.nextRound();
+
+  // Game is ended: send message to show that was the last round, delete room
+  if (socket.room.isGameEnded()) {
+
+    // Send tally while also indicating the game has ended
+    socket.nsp.to(socket.room.code).emit("room_end", tally, description);
+
+    // Make all clients leave room
+    console.log(socket.nsp.to(socket.room.code));
+    var roomSockets = socket.nsp.to(socket.room.code).sockets;
+    for (var roomSocket in roomSockets) {
+      if (roomSockets.hasOwnProperty(roomSocket)) {
+        roomSockets[roomSocket].player.score = 0;
+        roomSockets[roomSocket].player.gameScore = 0;
+        roomSockets[roomSocket].leave(socket.room.code);
+      }
+    }
+
+    // Delete room from game manager
+    manager.deleteRoom(socket.room.code);
+    manager.refreshLobby(socket);
+  }
+
+  // Game is not ended: send message to show tally and set a timeout to begin next round
+  else {
+    // Send tally to client
+    socket.nsp.to(socket.room.code).emit("room_show_tally", tally, description);
+
+    // Set a time out for when the tally should stop being shown
+    setTimeout(function timeoutRoomTally() {
+      startRound(socket);
+    }, GameManager.TALLY_DISPLAY_DELAY);
+  }
+}
 module.exports = gameSockets;

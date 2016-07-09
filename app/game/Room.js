@@ -44,6 +44,13 @@ Room.MIN_PLAYERS = 3;
  */
 Room.MAX_PLAYERS = 8;
 
+/**
+ * Time in seconds for a player to enter a description.
+ * Add a few seconds to the actual time limit to account for small client-side discrepencies
+ * @type {number}
+ */
+Room.DESCRIPTION_TIME_LIMIT = 65;
+
 /*
  * Public fields
  */
@@ -89,6 +96,12 @@ Room.prototype.acronyms = null;
  * @type {Acronym}
  */
 Room.prototype.acronym = null;
+
+/**
+ * Timeout object when waiting for player descriptions
+ * @type number I think?
+ */
+Room.prototype.timeout = null;
 
 /*
  * Public methods
@@ -194,7 +207,7 @@ Room.prototype.getPlayerDescriptions = function getPlayerDescriptions() {
     return player.answer;
   }).filter(function (answer, index, self) {
     // Remove duplicates TODO might not be necessary if we don't let people have the same answer
-    return index == self.indexOf(answer);
+    return answer !== null && index == self.indexOf(answer);
   });
 };
 
@@ -234,6 +247,21 @@ Room.prototype.resetRound = function resetRound() {
 };
 
 /**
+ * Set a timer for all players to enter description
+ * @param callback function to execute when timer expires
+ */
+Room.prototype.startTimeout = function startTimeout(callback) {
+  this.timeout = setTimeout(callback, Room.DESCRIPTION_TIME_LIMIT * 1000);
+};
+
+/**
+ * Stop the timer for players to enter their description, useful when all players have played within time limit
+ */
+Room.prototype.stopTimeout = function stopTimeout() {
+  clearTimeout(this.timeout);
+};
+
+/**
  * Return tally from current round and game for display on the client
  * @returns {Array|*}
  */
@@ -253,6 +281,6 @@ Room.prototype.getTally = function getTally() {
  */
 Room.prototype.isGameEnded = function isGameEnded() {
   return this.round > this.turns;
-}
+};
 
 module.exports = Room;

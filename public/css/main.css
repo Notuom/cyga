@@ -1,3 +1,4 @@
+/* Game */
 h1 i {
   font-size: 40px;
 }
@@ -12,11 +13,21 @@ h1 i {
   text-align: center;
 }
 
-.game-round-acronym-description {
+.game-round-acronym-description, #game-round-description-timer-container {
   text-align: center;
 }
 
-/* Lobby Css */
+#game-round-description-timer {
+  font-size: 30px;
+  font-weight: bold;
+  margin: 0 5px;
+}
+
+#game-over-container {
+  text-align: center;
+}
+
+/* Lobby */
 #room-list .room-join-code {
   margin-right: 10px;
 }
@@ -38,61 +49,3 @@ h1 i {
   margin-right: 5px;
 }
 
-#game-over-container {
-  text-align: center;
-}
-
-.component-row > div {
-  margin-bottom: 5px;
-}
-
-i.edit-acronym {
-  color: #1016ff;
-  padding: 7px 0 0 0;
-}
-
-i.edit-acronym:hover {
-  cursor: pointer;
-  color: #0b0fb0;
-}
-
-i.delete-acronym {
-  color: #FF0000;
-  padding: 7px 0 0 0;
-}
-
-i.delete-acronym:hover {
-  cursor: pointer;
-  color: #A90000;
-}
-
-#acronym-edit-panel {
-  width: 300px;
-  height: 215px;
-  position: fixed;
-  top: 0;
-  right: -300px;
-  -webkit-transition: right 500ms; /* Safari */
-  transition: right 500ms;
-}
-
-#acronym-edit-panel.show {
-  right: 0;
-}
-
-#adminAcronymEdit tr.updated {
-  background-color: #F2F25A;
-}
-
-#adminAcronymEdit tr.created {
-  background-color: #80F25A;
-}
-
-#adminAcronymEdit tr.deleted {
-  background-color: #f55500;
-  pointer-events: none;
-}
-
-.full-width {
-  width: 100%;
-}
