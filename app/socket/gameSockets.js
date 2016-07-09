@@ -137,9 +137,17 @@ var gameSockets = function gameSockets(socket) {
   socket.on('room_round_description', function (description) {
     console.log('"room_round_description" received with description=' + description);
 
-    // TODO : if two players have the same answer at the moment it could be problematic?
-    // it should just vote for both but is problematic if all players have the exact same answer. (very much an edge case, nobody cares)
-    socket.player.answer = description;
+    // If a player already has this answer, reject it
+    if (socket.room.answerExists(description)) {
+      socket.emit("room_round_description_already_taken", "This description was already sent by another player. Please use another one!");
+    }
+
+    // If not, use this one
+    else {
+      socket.emit("room_round_description_ok");
+      socket.player.answer = description;
+    }
+
     if (socket.room.allPlayersAnswered()) {
 
       // Send voting start with all player descriptions.

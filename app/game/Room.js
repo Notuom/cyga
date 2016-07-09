@@ -181,6 +181,18 @@ Room.prototype.getRoundStartMessage = function getRoomStartMessage() {
 };
 
 /**
+ * @param answer answer to check
+ * @returns {boolean} true if answer already exists for this round
+ */
+Room.prototype.answerExists = function answerExists(answer) {
+  for (var i = 0; i < this.players.length; i++) {
+    if (this.players[i].answer === answer)
+      return true;
+  }
+  return false;
+};
+
+/**
  * @returns {boolean} true if all players have answered and we can proceed to vote
  */
 Room.prototype.allPlayersAnswered = function allPlayersAnswered() {

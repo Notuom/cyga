@@ -64,7 +64,6 @@ $(function () {
     console.info("Sending room_round_description...");
     answer = $("#game-round-description").val();
     socket.emit("room_round_description", answer);
-    stopTimer();
   });
 
   // Replay
@@ -135,6 +134,19 @@ $(function () {
     $("#game-round-description, #game-round-submit").prop("disabled", false);
     $("#game-round-description").val("").focus();
     startTimer();
+  });
+
+  // Answer was ok - stop timer
+  socket.on("room_round_description_ok", function() {
+    stopTimer();
+  });
+
+  // Answer was already taken - reset input
+  socket.on("room_round_description_already_taken", function(error) {
+    // FIXME alert is a bad idea because it temporarily stops the timer... this is a very low-priority bug
+    alert(error);
+    $("#game-round-description").val("").focus();
+    $("#game-round-description, #game-round-submit").prop("disabled", false);
   });
 
   // Start voting
