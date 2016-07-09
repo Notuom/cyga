@@ -16,15 +16,24 @@ var Room = function Room(code, turns, acronyms) {
  */
 /**
  * Room status is "waiting" when the game has not been started
- * @type {number}
- */
-Room.STATUS_WAITING = 0;
-
-/**
  * Room status is "active" when the game has been started
  * @type {number}
  */
+Room.STATUS_WAITING = 0;
 Room.STATUS_ACTIVE = 1;
+
+/**
+ * Room phases.
+ * PHASE_NOT_STARTED : When room is not started. (STATUS_WAITING)
+ * PHASE_DESCRIPTION : Waiting for player descriptions
+ * PHASE_VOTE : Waiting for player votes
+ * PHASE_TALLY : Showing tally
+ * @type {number}
+ */
+Room.PHASE_NOT_STARTED = 0;
+Room.PHASE_DESCRIPTION = 1;
+Room.PHASE_VOTE = 2;
+Room.PHASE_TALLY = 3;
 
 /**
  * All of the alphanumerical characters which can be used in a room code.
@@ -42,7 +51,14 @@ Room.MIN_PLAYERS = 3;
  * Maximum number of players in a game.
  * @type {number}
  */
-Room.MAX_PLAYERS = 4;
+Room.MAX_PLAYERS = 8;
+
+/**
+ * Time in seconds for a player to enter a description.
+ * Add a few seconds to the actual time limit to account for small client-side discrepencies
+ * @type {number}
+ */
+Room.DESCRIPTION_TIME_LIMIT = 65;
 
 /*
  * Public fields
@@ -52,6 +68,12 @@ Room.MAX_PLAYERS = 4;
  * @type {number}
  */
 Room.prototype.status = Room.STATUS_WAITING;
+
+/**
+ * Room's current phase, defaults to NOT_STARTED
+ * @type {number}
+ */
+Room.prototype.phase = Room.PHASE_NOT_STARTED;
 
 /**
  * Room's code which must be 4 alphanumerical characters and unique for managing via GameManager
@@ -89,6 +111,12 @@ Room.prototype.acronyms = null;
  * @type {Acronym}
  */
 Room.prototype.acronym = null;
+
+/**
+ * Timeout object when waiting for player descriptions
+ * @type number I think?
+ */
+Room.prototype.timeout = null;
 
 /*
  * Public methods
@@ -153,6 +181,18 @@ Room.prototype.getRoundStartMessage = function getRoomStartMessage() {
 };
 
 /**
+ * @param answer answer to check
+ * @returns {boolean} true if answer already exists for this round
+ */
+Room.prototype.answerExists = function answerExists(answer) {
+  for (var i = 0; i < this.players.length; i++) {
+    if (this.players[i].answer === answer)
+      return true;
+  }
+  return false;
+};
+
+/**
  * @returns {boolean} true if all players have answered and we can proceed to vote
  */
 Room.prototype.allPlayersAnswered = function allPlayersAnswered() {
@@ -182,6 +222,7 @@ Room.prototype.getMaxPlayers = function getMaxPlayers() {
  */
 Room.prototype.startRounds = function startRounds() {
   this.status = Room.STATUS_ACTIVE;
+
 };
 
 /**
@@ -194,7 +235,7 @@ Room.prototype.getPlayerDescriptions = function getPlayerDescriptions() {
     return player.answer;
   }).filter(function (answer, index, self) {
     // Remove duplicates TODO might not be necessary if we don't let people have the same answer
-    return index == self.indexOf(answer);
+    return answer !== null && index == self.indexOf(answer);
   });
 };
 
@@ -234,6 +275,21 @@ Room.prototype.resetRound = function resetRound() {
 };
 
 /**
+ * Set a timer for all players to enter description
+ * @param callback function to execute when timer expires
+ */
+Room.prototype.startTimeout = function startTimeout(callback) {
+  this.timeout = setTimeout(callback, Room.DESCRIPTION_TIME_LIMIT * 1000);
+};
+
+/**
+ * Stop the timer for players to enter their description, useful when all players have played within time limit
+ */
+Room.prototype.stopTimeout = function stopTimeout() {
+  clearTimeout(this.timeout);
+};
+
+/**
  * Return tally from current round and game for display on the client
  * @returns {Array|*}
  */
@@ -253,6 +309,6 @@ Room.prototype.getTally = function getTally() {
  */
 Room.prototype.isGameEnded = function isGameEnded() {
   return this.round > this.turns;
-}
+};
 
 module.exports = Room;

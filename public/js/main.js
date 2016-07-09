@@ -1,12 +1,17 @@
 $(function () {
+  var DESCRIPTION_TIME_LIMIT = 60;
+
   var socket = io();
+
+  var isCreatingRoom = false;
   var username = false;
   var answer = "";
+  var currentDescriptionTime = 0;
+  var descriptionInterval = null;
 
   /*
    * User interactions
    */
-
   // Connection
   $("#connection-form").submit(function (event) {
     event.preventDefault();
@@ -36,9 +41,11 @@ $(function () {
   // Create new room
   $("#room-join-form").submit(function (event) {
     event.preventDefault();
-    console.info("Sending room_create_request...");
-
-    socket.emit("room_create_request", parseInt($("#room-create-turns").val()));
+    if (!isCreatingRoom) {
+      isCreatingRoom = true;
+      console.info("Sending room_create_request...");
+      socket.emit("room_create_request", parseInt($("#room-create-turns").val()));
+    }
   });
 
   // Start game
@@ -63,7 +70,7 @@ $(function () {
   $("#btn-replay").click(function (event) {
     event.preventDefault();
     $(".game-panel").hide();
-    $("#game-over-container").hide();
+    hideAllRoundComponents();
     $("#room-join-form").show();
   });
 
@@ -89,6 +96,7 @@ $(function () {
 
   // Server accepted room creation, show waiting panel
   socket.on("room_waiting_init", function (data) {
+    isCreatingRoom = false;
     console.info('"room_waiting_init" received with code=', data.code, ', admin=', data.admin);
     $(".game-panel").hide();
     $("#room-waiting-form").show();
@@ -117,20 +125,35 @@ $(function () {
   // Start new game round
   socket.on("room_start_round", function (data) {
     console.info('"room_start_round" received');
-    $("#game-round-tally-container, .game-panel, .game-round-acronym-description").hide();
+    $(".game-panel").hide();
+    hideAllRoundComponents();
 
     $(".game-round-round").text(data.round);
     $(".game-round-acronym").text(data.acronym);
     $("#game-round-form, #game-round-description-container").show();
     $("#game-round-description, #game-round-submit").prop("disabled", false);
     $("#game-round-description").val("").focus();
+    startTimer();
+  });
+
+  // Answer was ok - stop timer
+  socket.on("room_round_description_ok", function () {
+    stopTimer();
+  });
+
+  // Answer was already taken - reset input
+  socket.on("room_round_description_already_taken", function (error) {
+    // FIXME alert is a bad idea because it temporarily stops the timer... this is a very low-priority bug
+    alert(error);
+    $("#game-round-description").val("").focus();
+    $("#game-round-description, #game-round-submit").prop("disabled", false);
   });
 
   // Start voting
   socket.on("room_start_vote", function (data) {
     console.info("room_start_vote received");
     console.log(data);
-    $("#game-round-description-container").hide();
+    hideAllRoundComponents();
     var container$ = $("#game-round-voting-container");
     container$.empty().show();
     for (var i = 0; i < data.length; i++) {
@@ -174,83 +197,140 @@ $(function () {
     alert(error);
   });
 
+  // Room abrupt end when there aren't enough players left
+  socket.on('room_abrupt_end', function (error) {
+    alert(error);
+    $(".game-panel").hide();
+    hideAllRoundComponents();
+    $("#room-join-form").show();
+  });
+
   // Disconnected from socket server
   socket.on('disconnect', function () {
     console.info('"disconnect" reçu');
     $(".game-panel").hide();
     $("#disconnect-panel").show();
   });
-});
 
-/*
- * Helper functions
- */
-// Rafraichir la liste d'players dans la salle d'attente
-function refreshPlayers(players) {
-  $("#room-waiting-players").empty();
-  for (var i = 0; i < players.length; i++) {
-    $("<tr><td>" + players[i].username + "</td></tr>")
-      .appendTo($("#room-waiting-players"));
-  }
-}
-// Modifier le nombre de salle dans la liste
-function changeNumberofRooms() {
-  $("#number-of-rooms").text($("#room-list li").length);
-}
-
-// Create the HTML for the room in lobby
-function createHtmlRoom(code, current, max) {
-  var li = $('<li id="' + code + '" class="list-group-item"></li>');
-  var button = $('<button type="button" data-room="' + code + '" name="room-join" class="room-join btn btn-sm btn-success pull-right"></button>');
-  var icon = '<i class="glyphicon glyphicon-arrow-right"></i> Join this room';
-  var roomCode = '<span class="room-join-code">' + code + '</span>';
-  var minPlayer = '<span class="label label-default label-pill pull-xs-right min-players">' + current + '</span>  /  ';
-  var maxPlayer = '<span class="label label-default label-pill pull-xs-right max-player">' + max + '</span>';
-  button.append(icon);
-  li.append(roomCode, minPlayer, maxPlayer, button);
-  return li;
-}
-
-// Show room tally after round or when game is over
-function showTally(tally, description, isGameOver) {
-  $(".game-round-acronym-description").text(description).show();
-  $("#game-round-voting-container").hide();
-  $("#game-round-tally-container").show();
-  var container$ = $("#game-round-tally");
-  container$.empty();
-
-  // Sort by score
-  tally.sort(function (a, b) {
-    return a.gameScore < b.gameScore;
-  });
-
-  // Display scores
-  for (var i = 0; i < tally.length; i++) {
-    var tr$ = $('<tr></tr>').data("tally", tally[i]);
-    tr$.append('<td>' + tally[i].username + '</td>');
-    tr$.append('<td>' + tally[i].answer + '</td>');
-    tr$.append('<td>' + tally[i].roundScore + '</td>');
-    tr$.append('<td>' + tally[i].gameScore + '</td>');
-    tr$.appendTo(container$);
-  }
-
-  if (isGameOver) {
-
-    // Find which element has max score
-    var max$;
-    container$.find("tr").each(function () {
-      if (typeof max$ === "undefined") {
-        max$ = $(this);
-      } else if ($(this).data("tally").gameScore > max$.gameScore) {
-        max$ = $(this);
+  /*
+   * Helper functions
+   */
+  // Refresh plaeyrs in waiting room
+  function refreshPlayers(players) {
+    $("#room-waiting-players").empty();
+    for (var i = 0; i < players.length; i++) {
+      // If the admin is now me, show my the "start game" button
+      if (players[i].username === username && players[i].admin) {
+        console.log("I am the new admin!");
+        $("#room-waiting-go").show();
       }
+      // Append users to waiting table
+      $("<tr><td>" + players[i].username + "</td></tr>")
+        .appendTo($("#room-waiting-players"));
+    }
+  }
+
+  // Changer number of rooms in list
+  function changeNumberofRooms() {
+    $("#number-of-rooms").text($("#room-list li").length);
+  }
+
+  // Create the HTML for the room in lobby
+  function createHtmlRoom(code, current, max) {
+    var li = $('<li id="' + code + '" class="list-group-item"></li>');
+    var button = $('<button type="button" data-room="' + code + '" name="room-join" class="room-join btn btn-sm btn-success pull-right"></button>');
+    var icon = '<i class="glyphicon glyphicon-arrow-right"></i> Join this room';
+    var roomCode = '<span class="room-join-code">' + code + '</span>';
+    var minPlayer = '<span class="label label-default label-pill pull-xs-right min-players">' + current + '</span>  /  ';
+    var maxPlayer = '<span class="label label-default label-pill pull-xs-right max-player">' + max + '</span>';
+    button.append(icon);
+    li.append(roomCode, minPlayer, maxPlayer, button);
+    return li;
+  }
+
+  // Start description timer
+  function startTimer() {
+    stopTimer();
+    currentDescriptionTime = DESCRIPTION_TIME_LIMIT + 1;
+    timerTick();
+    descriptionInterval = setInterval(timerTick, 1000);
+  }
+
+  // Decrease time limit each second
+  function timerTick() {
+    if (currentDescriptionTime > 0) {
+      currentDescriptionTime--;
+      $("#game-round-description-timer").text(currentDescriptionTime);
+    } else {
+      stopTimer();
+    }
+  }
+
+  // Stop description timer
+  function stopTimer() {
+    clearInterval(descriptionInterval);
+  }
+
+  // Show room tally after round or when game is over
+  function showTally(tally, description, isGameOver) {
+    hideAllRoundComponents();
+    $(".game-round-acronym-description").text(description).show();
+    $("#game-round-tally-container").show();
+    var container$ = $("#game-round-tally");
+    container$.empty();
+
+    // Sort by score
+    tally.sort(function (a, b) {
+      return a.gameScore < b.gameScore;
     });
 
-    // Assign a nice star icon to the winner
-    max$.find("td").eq(0).prepend('<i class="glyphicon glyphicon-star winner-icon"></i>');
+    // Display scores
+    for (var i = 0; i < tally.length; i++) {
+      if (tally[i].answer === null) tally[i].answer = "";
+      var tr$ = $('<tr></tr>').data("tally", tally[i]);
+      tr$.append('<td>' + tally[i].username + '</td>');
+      tr$.append('<td>' + tally[i].answer + '</td>');
+      tr$.append('<td>' + tally[i].roundScore + '</td>');
+      tr$.append('<td>' + tally[i].gameScore + '</td>');
+      tr$.appendTo(container$);
+    }
 
-    // Show their glorious name under the game-over prompt
-    $("#game-over-container").show();
-    $("#game-over-winner").text(max$.data("tally").username);
+    if (isGameOver) {
+
+      // Find max score
+      var maxScore = 0;
+      container$.find("tr").each(function () {
+        if (maxScore === 0 || $(this).data("tally").gameScore > maxScore) {
+          maxScore = $(this).data("tally").gameScore;
+        }
+      });
+
+      // Display stars next to winner(s) name(s) and display winner(s) name(s)
+      var winners = "";
+      container$.find("tr").each(function () {
+        if ($(this).data("tally").gameScore === maxScore) {
+
+          // Assign a nice star icon to the winner(s)
+          $(this).find("td").eq(0).prepend('<i class="glyphicon glyphicon-star winner-icon"></i>');
+
+          // Keep name for display
+          if (winners !== "") {
+            winners += ", ";
+          }
+          winners += $(this).data("tally").username;
+        }
+      });
+
+      // Show their glorious name under the game-over prompt
+      $("#game-over-winner").text(winners);
+      $("#game-over-container").show();
+    }
   }
-}
+
+  /**
+   * Hide all DOM elements which may need to be hidden during certain game phases within the same round
+   */
+  function hideAllRoundComponents() {
+    $(".game-round-acronym-description, #game-round-description-container, #game-round-voting-container, #game-round-tally-container, #game-over-container").hide();
+  }
+});

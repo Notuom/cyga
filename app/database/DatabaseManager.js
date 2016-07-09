@@ -55,16 +55,13 @@ DatabaseManager.prototype.insertAcronyms = function insertAcronyms(acronyms, cal
   var client = new pg.Client(config.databaseUrl);
   client.connect();
   sql = 'INSERT INTO log515_cyga.acronym (acronym, definition) VALUES ($1,$2)';
-  async.map(acronyms,function(row,cb){
-    client.query(sql, row,function(err, response)
-    {
-      if (!err)
-      {
-        cb(err,response);
+  async.map(acronyms, function (row, cb) {
+    client.query(sql, row, function (err, response) {
+      if (!err) {
+        cb(err, response);
       }
     });
-  },function(err,res)
-  {
+  }, function (err, res) {
     client.end();
   });
 };
@@ -73,16 +70,13 @@ DatabaseManager.prototype.updateAcronyms = function updateAcronyms(acronyms, cal
   var client = new pg.Client(config.databaseUrl);
   client.connect();
   sql = 'UPDATE log515_cyga.acronym SET definition = $2 WHERE acronymid = $1';
-  async.map(acronyms,function(row,cb){
-    client.query(sql, row,function(err, response)
-    {
-      if (!err)
-      {
-        cb(err,response);
+  async.map(acronyms, function (row, cb) {
+    client.query(sql, row, function (err, response) {
+      if (!err) {
+        cb(err, response);
       }
     });
-  },function(err,res)
-  {
+  }, function (err, res) {
     client.end();
   });
 };
@@ -91,16 +85,13 @@ DatabaseManager.prototype.deleteAcronyms = function deleteAcronyms(acronyms, cal
   var client = new pg.Client(config.databaseUrl);
   client.connect();
   sql = 'DELETE FROM log515_cyga.acronym WHERE acronymid = ';
-  async.map(acronyms,function(row,cb){
-    client.query(sql + row,function(err, response)
-    {
-      if (!err)
-      {
-        cb(err,response);
+  async.map(acronyms, function (row, cb) {
+    client.query(sql + row, function (err, response) {
+      if (!err) {
+        cb(err, response);
       }
     });
-  },function(err,res)
-  {
+  }, function (err, res) {
     client.end();
   });
 };

@@ -30,6 +30,11 @@ Player.prototype.gameScore = 0;
  */
 Player.prototype.answer = null;
 
+/**
+ * Is player the host of this game?
+ * @type {boolean}
+ */
+Player.prototype.admin = false;
 
 /**
  * Player's current vote for this round
