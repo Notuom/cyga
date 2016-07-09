@@ -160,7 +160,7 @@ var gameSockets = function gameSockets(socket) {
 
     // If this is the last player to vote on this round
     if (socket.room.allPlayersVoted()) {
-      endVoting(socket);
+      startTally(socket);
     }
   });
 
@@ -177,7 +177,19 @@ var gameSockets = function gameSockets(socket) {
 
         // Remove player from room
         socket.room.removePlayer(socket.player);
-        console.log("Room players", manager.players);
+
+        // Handle case where we were waiting for player to answer
+        if (socket.room.phase === Room.PHASE_DESCRIPTION && socket.room.allPlayersAnswered()) {
+
+          // Send voting start with all player descriptions.
+          console.log("All players answered for room with code=" + socket.room.code);
+          socket.room.stopTimeout();
+          startVote(socket);
+        }
+        // Handle case where we were waiting for this player to vote
+        else if (socket.room.phase === Room.PHASE_VOTE && socket.room.allPlayersVoted()) {
+          startTally(socket);
+        }
 
         // Send update to room players if in waiting state
         if (socket.room.status === Room.STATUS_WAITING) {
@@ -239,6 +251,7 @@ function startRoom(socket) {
  * @param socket socket.io socket instance
  */
 function startRound(socket) {
+  socket.room.phase = Room.PHASE_DESCRIPTION;
   socket.nsp.to(socket.room.code).emit("room_start_round", socket.room.getRoundStartMessage());
   socket.room.startTimeout(function roomDescriptionTimeout() {
     console.log("Description timeout expired for room with code=" + socket.room.code);
@@ -251,6 +264,7 @@ function startRound(socket) {
  * @param socket socket.io socket instance
  */
 function startVote(socket) {
+  socket.room.phase = Room.PHASE_VOTE;
   var descriptions = socket.room.getPlayerDescriptions();
 
   // Descriptions have been entered, show voting screen
@@ -261,15 +275,16 @@ function startVote(socket) {
   // No descriptions entered - come on lazy players! show tally directly.
   else {
     console.log("No description found in round, skip voting for room with code=" + socket.room.code);
-    endVoting(socket);
+    startTally(socket);
   }
 }
 
 /**
  * End voting phase when all players have voted
- @param socket socket.io socket instance
+ * @param socket socket.io socket instance
  */
-function endVoting(socket) {
+function startTally(socket) {
+  socket.room.phase = Room.PHASE_TALLY;
 
   // Compute tally for this round
   var tally = socket.room.getTally();
@@ -295,7 +310,7 @@ function endVoting(socket) {
       }
     }
 
-    // Delete room from game manager
+    // Delete room from game manager and remove from lobby
     manager.deleteRoom(socket.room.code);
     manager.refreshLobby(socket);
   }

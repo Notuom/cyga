@@ -16,15 +16,24 @@ var Room = function Room(code, turns, acronyms) {
  */
 /**
  * Room status is "waiting" when the game has not been started
- * @type {number}
- */
-Room.STATUS_WAITING = 0;
-
-/**
  * Room status is "active" when the game has been started
  * @type {number}
  */
+Room.STATUS_WAITING = 0;
 Room.STATUS_ACTIVE = 1;
+
+/**
+ * Room phases.
+ * PHASE_NOT_STARTED : When room is not started. (STATUS_WAITING)
+ * PHASE_DESCRIPTION : Waiting for player descriptions
+ * PHASE_VOTE : Waiting for player votes
+ * PHASE_TALLY : Showing tally
+ * @type {number}
+ */
+Room.PHASE_NOT_STARTED = 0;
+Room.PHASE_DESCRIPTION = 1;
+Room.PHASE_VOTE = 2;
+Room.PHASE_TALLY = 3;
 
 /**
  * All of the alphanumerical characters which can be used in a room code.
@@ -59,6 +68,12 @@ Room.DESCRIPTION_TIME_LIMIT = 65;
  * @type {number}
  */
 Room.prototype.status = Room.STATUS_WAITING;
+
+/**
+ * Room's current phase, defaults to NOT_STARTED
+ * @type {number}
+ */
+Room.prototype.phase = Room.PHASE_NOT_STARTED;
 
 /**
  * Room's code which must be 4 alphanumerical characters and unique for managing via GameManager
@@ -195,6 +210,7 @@ Room.prototype.getMaxPlayers = function getMaxPlayers() {
  */
 Room.prototype.startRounds = function startRounds() {
   this.status = Room.STATUS_ACTIVE;
+
 };
 
 /**
