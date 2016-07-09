@@ -12,7 +12,6 @@ var DatabaseManager = require(__base + 'database/DatabaseManager');
 var db = new DatabaseManager();
 
 var gameSockets = function gameSockets(socket) {
-  socket.player = null;
 
   // Register player
   socket.on('user_connection_request', function (username) {
@@ -172,7 +171,7 @@ var gameSockets = function gameSockets(socket) {
 
   // Disconnect (managed by socket.io, can happen anytime)
   socket.on('disconnect', function () {
-    if (socket.player !== null) {
+    if ("player" in socket) {
       console.log('Disconnect for username=' + socket.player.username);
 
       // Remove player from games
@@ -348,12 +347,23 @@ function startTally(socket) {
  */
 function emptyRoom(socket) {
   console.log("Emptying room and resetting players for room with code=" + socket.room.code);
-  var roomSockets = socket.nsp.to(socket.room.code).sockets;
-  for (var roomSocket in roomSockets) {
-    if (roomSockets.hasOwnProperty(roomSocket)) {
-      roomSockets[roomSocket].player.score = 0;
-      roomSockets[roomSocket].player.gameScore = 0;
-      roomSockets[roomSocket].leave(socket.room.code);
+  var allSockets = socket.nsp.sockets;
+
+  // Loop on ALL open sockets
+  for (var socketName in allSockets) {
+
+    // Check that the current socket is active and in the same room as the originating socket
+    if (allSockets.hasOwnProperty(socketName)) {
+
+      var targetSocket = allSockets[socketName];
+
+      if ("player" in targetSocket && "room" in targetSocket && targetSocket.room.code === socket.room.code) {
+
+        // Reset this socket's player score and make it leave this room
+        targetSocket.player.score = 0;
+        targetSocket.player.gameScore = 0;
+        targetSocket.leave(socket.room.code);
+      }
     }
   }
 }
