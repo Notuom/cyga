@@ -191,7 +191,6 @@ var gameSockets = function gameSockets(socket) {
       // Game is not ended: send message to show tally and set a timeout to begin next round
       else {
         // Send tally to client
-        // TODO send real description too
         socket.nsp.to(socket.room.code).emit("room_show_tally", tally, description);
 
         // Set a time out for when the tally should stop being shown
@@ -219,10 +218,10 @@ var gameSockets = function gameSockets(socket) {
 
         // Send update to room players if in waiting state
         if (socket.room.status === Room.STATUS_WAITING) {
-          // TODO give host to other player or remove game if host leaves?
+          // TODO give host to other player or remove game if host leaves? Does it matter who hosts?
           socket.to(socket.room.code).emit("room_waiting_update", socket.room.players);
         }
-        // TODO send event if in-game too?
+        // TODO handle cases where a game may halt because of someone leaving
 
         // If this was the last player in room, delete room
         if (socket.room.players.length === 0) {
