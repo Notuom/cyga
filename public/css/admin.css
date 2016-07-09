@@ -1,0 +1,27 @@
+/*
+ * Utilisation de code
+ * http://stackoverflow.com/questions/17067294/html-table-with-100-width-with-vertical-scroll-inside-tbody
+*/
+table {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  width: 100%;
+}
+table thead {
+  flex: 0 0 auto;
+  width: 100%;/* calc(100% - 0.9em)*/
+}
+table tbody {
+  flex: 1 1 auto;
+  display: block;
+  overflow-y: scroll;
+}
+table tbody tr {
+  width: 100%;
+}
+table thead, table tbody tr {
+  display: table;
+  table-layout: fixed;
+}
+/* END : Utilisation de code */
