@@ -41,3 +41,79 @@ h1 i {
 #game-over-container {
   text-align: center;
 }
+
+.component-row > div {
+    margin-bottom: 5px;
+}
+
+i.edit-acronym {
+    color: #1016ff;
+    padding: 7px 0 0 0;
+}
+
+i.edit-acronym:hover {
+    cursor: pointer;
+    color: #0b0fb0;
+}
+
+i.delete-acronym {
+    color: #FF0000;
+    padding: 7px 0 0 0;
+}
+
+i.delete-acronym:hover {
+    cursor: pointer;
+    color: #A90000;
+}
+
+#acronym-edit-panel {
+    width: 300px;
+    height: 215px;
+    position: fixed;
+    top: 0;
+    right: -300px;
+    -webkit-transition: right 500ms; /* Safari */
+    transition: right 500ms;
+}
+
+#acronym-edit-panel.show {
+    right: 0;
+}
+
+#adminAcronymEdit tr.updated {background-color: #F2F25A;}
+#adminAcronymEdit tr.created {background-color: #80F25A;}
+#adminAcronymEdit tr.deleted {
+    background-color: #f55500;
+    pointer-events: none;
+}
+
+.full-width {
+    width: 100%;
+}
+/*
+ * Utilisation de code
+ * http://stackoverflow.com/questions/17067294/html-table-with-100-width-with-vertical-scroll-inside-tbody
+*/
+table {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    width: 100%;
+}
+table thead {
+    flex: 0 0 auto;
+    width: 100%;/* calc(100% - 0.9em)*/
+}
+table tbody {
+    flex: 1 1 auto;
+    display: block;
+    overflow-y: scroll;
+}
+table tbody tr {
+    width: 100%;
+}
+table thead, table tbody tr {
+    display: table;
+    table-layout: fixed;
+}
+/* END : Utilisation de code */

@@ -15,8 +15,10 @@
   "author": "LOG515 E2016 EQ11",
   "license": "UNLICENSED",
   "dependencies": {
+    "async": "^2.0.0-rc.6",
     "express": "^4.13.4",
     "pg": "6.0.0",
+    "pug": "^2.0.0-beta3",
     "socket.io": "^1.4.6"
   },
   "jshintConfig": {
