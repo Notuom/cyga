@@ -144,7 +144,6 @@ var gameSockets = function gameSockets(socket) {
 
       // Send voting start with all player descriptions.
       console.log("All players answered for room with code=" + socket.room.code);
-      socket.room.stopTimeout();
       startVote(socket);
     }
   });
@@ -182,7 +181,6 @@ var gameSockets = function gameSockets(socket) {
 
           // Send voting start with all player descriptions.
           console.log("All players answered for room with code=" + socket.room.code);
-          socket.room.stopTimeout();
           startVote(socket);
         }
         // We were waiting for this player to vote
@@ -192,17 +190,24 @@ var gameSockets = function gameSockets(socket) {
 
         // Send update to room players if in waiting state
         if (socket.room.status === Room.STATUS_WAITING) {
-          // TODO give host to other player or remove game if host leaves? Does it matter who hosts?
           if (socket.player.admin) {
-            console.log("Transfering host privileges to username=" + socket.room.players[0].username)
+            console.log("Transfering host privileges for room code= " + socket.room.code
+              + " to username=" + socket.room.players[0].username);
             socket.room.players[0].admin = true;
           }
           socket.to(socket.room.code).emit("room_waiting_update", socket.room.players);
         }
 
-        // If this was the last player in room, delete room
-        if (socket.room.players.length === 0) {
-          console.log("Last player for room with code=" + socket.room.code);
+        // Game is started and there are not enough players left
+        if (socket.room.status === Room.STATUS_ACTIVE && socket.room.players.length < Room.MIN_PLAYERS) {
+          console.log("Not enough players remain for room with code=" + socket.room.code);
+          socket.room.stopTimeout();
+          socket.nsp.to(socket.room.code).emit("room_abrupt_end", "Last critical player has left the room. There aren't enough players left to continue the game. Please play again.");
+          emptyRoom(socket);
+          manager.deleteRoom(socket.room.code);
+        }
+        // Game is not started but nobody's left
+        else if (socket.room.players.length === 0) {
           manager.deleteRoom(socket.room.code);
         }
 
@@ -266,6 +271,9 @@ function startRound(socket) {
  * @param socket socket.io socket instance
  */
 function startVote(socket) {
+  // Stop description timeout before voting starts
+  socket.room.stopTimeout();
+
   socket.room.phase = Room.PHASE_VOTE;
   var descriptions = socket.room.getPlayerDescriptions();
 
@@ -302,15 +310,7 @@ function startTally(socket) {
     socket.nsp.to(socket.room.code).emit("room_end", tally, description);
 
     // Make all clients leave room
-    console.log(socket.nsp.to(socket.room.code));
-    var roomSockets = socket.nsp.to(socket.room.code).sockets;
-    for (var roomSocket in roomSockets) {
-      if (roomSockets.hasOwnProperty(roomSocket)) {
-        roomSockets[roomSocket].player.score = 0;
-        roomSockets[roomSocket].player.gameScore = 0;
-        roomSockets[roomSocket].leave(socket.room.code);
-      }
-    }
+    emptyRoom(socket);
 
     // Delete room from game manager and remove from lobby
     manager.deleteRoom(socket.room.code);
@@ -326,6 +326,22 @@ function startTally(socket) {
     setTimeout(function timeoutRoomTally() {
       startRound(socket);
     }, GameManager.TALLY_DISPLAY_DELAY);
+  }
+}
+
+/**
+ * Empty game room without removing players from the game manager, when the game is over
+ * @param socket socket.io socket instance
+ */
+function emptyRoom(socket) {
+  console.log("Emptying room and resetting players for room with code=" + socket.room.code);
+  var roomSockets = socket.nsp.to(socket.room.code).sockets;
+  for (var roomSocket in roomSockets) {
+    if (roomSockets.hasOwnProperty(roomSocket)) {
+      roomSockets[roomSocket].player.score = 0;
+      roomSockets[roomSocket].player.gameScore = 0;
+      roomSockets[roomSocket].leave(socket.room.code);
+    }
   }
 }
 module.exports = gameSockets;

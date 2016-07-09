@@ -185,6 +185,14 @@ $(function () {
     alert(error);
   });
 
+  // Room abrupt end when there aren't enough players left
+  socket.on('room_abrupt_end', function(error) {
+    alert(error);
+    $(".game-panel").hide();
+    hideAllRoundComponents();
+    $("#room-join-form").show();
+  });
+
   // Disconnected from socket server
   socket.on('disconnect', function () {
     console.info('"disconnect" reçu');
