@@ -43,8 +43,10 @@ DatabaseManager.prototype.getRandomAcronyms = function getRandomAcronyms(size, c
  */
 DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
   query.first('SELECT username FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
-    return (result && result.length == 0);
+    //return typeof result == "undefined";
+    console.log(result);
   });
+  return true;
 };
 
 /**
@@ -52,7 +54,7 @@ DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
  * @param user
  */
 DatabaseManager.prototype.insertNewUser = function insertNewUser(user) {
-  query('INSERT INTO users FROM log515_cyga.users (username, password, email, usertype) VALUES ($1, $2, $3, user)', [user.username, user.password, user.email], function(err, result) {
+  query('INSERT INTO users FROM log515_cyga.users (username, password, usertype) VALUES ($1, $2, user)', [user.username, user.password], function(err, result) {
     console.log(result);
   });
 };

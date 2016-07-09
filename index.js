@@ -79,10 +79,15 @@ passport.deserializeUser(function(obj, done) {
 
 passport.use('signup', new LocalStrategy(
     {passReqToCallback : true},
-    function(req, email, username, password, done) {
+    function(req, username, password, done) {
       console.log('test signup');
-      loginHelper.localReg(email, username, password)
+      console.log('test req : '+ req);
+      console.log('test username : ' + username);
+      console.log('test password : ' + password);
+      console.log('test done : ' + done);
+      loginHelper.localReg(username, password)
        .then(function (user) {
+         console.log(user);
        if (user) {
          console.log("REGISTERED: " + user.username);
          req.session.success = 'You are successfully registered and logged in ' + user.username + '!';
