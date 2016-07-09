@@ -1,12 +1,4 @@
 /**
- * An acronym with a title and a description
- * @constructor
- */
-var Acronym = function Acronym(name, description) {
-  this.name = name;
-  this.description = description;
-};
-/**
  * An acronym with an id, a title and a description
  * @constructor
  */
@@ -20,10 +12,10 @@ var Acronym = function Acronym(id, name, description) {
  * Instance fields
  */
 /**
- * Acronym name (letters that the players need to define)
+ * Acronym id
  * @type {string}
  */
-Acronym.prototype.id = "dd";
+Acronym.prototype.id = "";
 
 /**
  * Acronym name (letters that the players need to define)
