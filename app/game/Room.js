@@ -42,7 +42,7 @@ Room.MIN_PLAYERS = 3;
  * Maximum number of players in a game.
  * @type {number}
  */
-Room.MAX_PLAYERS = 4;
+Room.MAX_PLAYERS = 8;
 
 /*
  * Public fields
