@@ -199,6 +199,12 @@ $(function () {
   function refreshPlayers(players) {
     $("#room-waiting-players").empty();
     for (var i = 0; i < players.length; i++) {
+      // If the admin is now me, show my the "start game" button
+      if (players[i].username === username && players[i].admin) {
+        console.log("i am the new admin");
+        $("#room-waiting-go").show();
+      }
+      // Append users to waiting table
       $("<tr><td>" + players[i].username + "</td></tr>")
         .appendTo($("#room-waiting-players"));
     }

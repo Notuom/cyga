@@ -13,7 +13,6 @@ var db = new DatabaseManager();
 
 var gameSockets = function gameSockets(socket) {
   socket.player = null;
-  socket.admin = false;
 
   // Register player
   socket.on('user_connection_request', function (username) {
@@ -57,7 +56,7 @@ var gameSockets = function gameSockets(socket) {
       room.addPlayer(socket.player);
       console.log(room);
 
-      socket.admin = true;
+      socket.player.admin = true;
       socket.room = room;
 
       socket.nsp.to("lobby").emit("add_room_to_lobby", {
@@ -69,7 +68,7 @@ var gameSockets = function gameSockets(socket) {
       socket.join(room.code);
 
       socket.emit("room_waiting_init", {
-        admin: true,
+        admin: socket.player.admin,
         code: room.code,
         players: room.players,
         turns: turns
@@ -89,13 +88,13 @@ var gameSockets = function gameSockets(socket) {
 
         // Room is waiting
         if (manager.rooms[code].status === Room.STATUS_WAITING) {
-          socket.admin = false;
+          socket.player.admin = false;
           socket.room = manager.rooms[code];
           socket.room.addPlayer(socket.player);
           socket.join(code);
 
           socket.emit("room_waiting_init", {
-            admin: false,
+            admin: socket.player.admin,
             code: code,
             players: socket.room.players,
             turns: socket.room.turns
@@ -178,7 +177,7 @@ var gameSockets = function gameSockets(socket) {
         // Remove player from room
         socket.room.removePlayer(socket.player);
 
-        // Handle case where we were waiting for player to answer
+        // We were waiting for this player to answer
         if (socket.room.phase === Room.PHASE_DESCRIPTION && socket.room.allPlayersAnswered()) {
 
           // Send voting start with all player descriptions.
@@ -186,7 +185,7 @@ var gameSockets = function gameSockets(socket) {
           socket.room.stopTimeout();
           startVote(socket);
         }
-        // Handle case where we were waiting for this player to vote
+        // We were waiting for this player to vote
         else if (socket.room.phase === Room.PHASE_VOTE && socket.room.allPlayersVoted()) {
           startTally(socket);
         }
@@ -194,9 +193,12 @@ var gameSockets = function gameSockets(socket) {
         // Send update to room players if in waiting state
         if (socket.room.status === Room.STATUS_WAITING) {
           // TODO give host to other player or remove game if host leaves? Does it matter who hosts?
+          if (socket.player.admin) {
+            console.log("Transfering host privileges to username=" + socket.room.players[0].username)
+            socket.room.players[0].admin = true;
+          }
           socket.to(socket.room.code).emit("room_waiting_update", socket.room.players);
         }
-        // TODO handle cases where a game may halt because of someone leaving
 
         // If this was the last player in room, delete room
         if (socket.room.players.length === 0) {
@@ -219,7 +221,7 @@ function startRoom(socket) {
   console.log('"room_start_request" received');
 
   // Player is admin or the game can be auto-started due to max players reached
-  if (socket.admin || socket.room.players.length == socket.room.getMaxPlayers()) {
+  if (socket.player.admin || socket.room.players.length == socket.room.getMaxPlayers()) {
 
     // Enough players
     if (socket.room.hasMinPlayers() && socket.room.hasMaxPlayers()) {
