@@ -145,6 +145,7 @@ var gameSockets = function gameSockets(socket) {
 
       // Send voting start with all player descriptions.
       console.log("All players answered for room with code=" + socket.room.code);
+      socket.room.stopTimeout();
       startVote(socket);
     }
   });
