@@ -201,7 +201,7 @@ $(function () {
     for (var i = 0; i < players.length; i++) {
       // If the admin is now me, show my the "start game" button
       if (players[i].username === username && players[i].admin) {
-        console.log("i am the new admin");
+        console.log("I am the new admin!");
         $("#room-waiting-go").show();
       }
       // Append users to waiting table
