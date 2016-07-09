@@ -30,6 +30,7 @@ DatabaseManager.prototype.getRandomAcronyms = function getRandomAcronyms(size, c
         return new Acronym(row.acronymid, row.acronym, row.definition);
       });
       callback(acronyms);
+      client.end();
     }
   });
 };
@@ -45,6 +46,7 @@ DatabaseManager.prototype.getAcronyms = function getAcronyms(callback) {
         return new Acronym(row.acronymid, row.acronym, row.definition);
       });
       callback(acronyms);
+      client.end();
     }
   });
 };
