@@ -137,12 +137,12 @@ $(function () {
   });
 
   // Answer was ok - stop timer
-  socket.on("room_round_description_ok", function() {
+  socket.on("room_round_description_ok", function () {
     stopTimer();
   });
 
   // Answer was already taken - reset input
-  socket.on("room_round_description_already_taken", function(error) {
+  socket.on("room_round_description_already_taken", function (error) {
     // FIXME alert is a bad idea because it temporarily stops the timer... this is a very low-priority bug
     alert(error);
     $("#game-round-description").val("").focus();
@@ -198,7 +198,7 @@ $(function () {
   });
 
   // Room abrupt end when there aren't enough players left
-  socket.on('room_abrupt_end', function(error) {
+  socket.on('room_abrupt_end', function (error) {
     alert(error);
     $(".game-panel").hide();
     hideAllRoundComponents();
@@ -297,23 +297,33 @@ $(function () {
 
     if (isGameOver) {
 
-      // Find which element has max score
-      var max$;
+      // Find max score
+      var maxScore = 0;
       container$.find("tr").each(function () {
-        if (typeof max$ === "undefined") {
-          max$ = $(this);
-        } else if ($(this).data("tally").gameScore > max$.gameScore) {
-          max$ = $(this);
+        if (maxScore === 0 || $(this).data("tally").gameScore > maxScore) {
+          maxScore = $(this).data("tally").gameScore;
         }
       });
 
-      // FIXME bug #17 there could be more than one winner!
-      // Assign a nice star icon to the winner(s)
-      max$.find("td").eq(0).prepend('<i class="glyphicon glyphicon-star winner-icon"></i>');
+      // Display stars next to winner(s) name(s) and display winner(s) name(s)
+      var winners = "";
+      container$.find("tr").each(function () {
+        if ($(this).data("tally").gameScore === maxScore) {
+
+          // Assign a nice star icon to the winner(s)
+          $(this).find("td").eq(0).prepend('<i class="glyphicon glyphicon-star winner-icon"></i>');
+
+          // Keep name for display
+          if (winners !== "") {
+            winners += ", ";
+          }
+          winners += $(this).data("tally").username;
+        }
+      });
 
       // Show their glorious name under the game-over prompt
+      $("#game-over-winner").text(winners);
       $("#game-over-container").show();
-      $("#game-over-winner").text(max$.data("tally").username);
     }
   }
 
@@ -321,6 +331,6 @@ $(function () {
    * Hide all DOM elements which may need to be hidden during certain game phases within the same round
    */
   function hideAllRoundComponents() {
-    $(".game-round-acronym-description, #game-round-description-container, #game-round-voting-container, #game-round-tally-container").hide();
+    $(".game-round-acronym-description, #game-round-description-container, #game-round-voting-container, #game-round-tally-container, #game-over-container").hide();
   }
 });

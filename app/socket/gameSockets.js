@@ -184,38 +184,43 @@ var gameSockets = function gameSockets(socket) {
         // Remove player from room
         socket.room.removePlayer(socket.player);
 
-        // We were waiting for this player to answer
-        if (socket.room.phase === Room.PHASE_DESCRIPTION && socket.room.allPlayersAnswered()) {
+        // Game still has player, need to do stuff according to game status
+        if (socket.room.players.length > 0) {
 
-          // Send voting start with all player descriptions.
-          console.log("All players answered for room with code=" + socket.room.code);
-          startVote(socket);
-        }
-        // We were waiting for this player to vote
-        else if (socket.room.phase === Room.PHASE_VOTE && socket.room.allPlayersVoted()) {
-          startTally(socket);
-        }
+          // We were waiting for this player to answer
+          if (socket.room.phase === Room.PHASE_DESCRIPTION && socket.room.allPlayersAnswered()) {
 
-        // Send update to room players if in waiting state
-        if (socket.room.status === Room.STATUS_WAITING) {
-          if (socket.player.admin) {
-            console.log("Transfering host privileges for room code= " + socket.room.code
-              + " to username=" + socket.room.players[0].username);
-            socket.room.players[0].admin = true;
+            // Send voting start with all player descriptions.
+            console.log("All players answered for room with code=" + socket.room.code);
+            startVote(socket);
           }
-          socket.to(socket.room.code).emit("room_waiting_update", socket.room.players);
+          // We were waiting for this player to vote
+          else if (socket.room.phase === Room.PHASE_VOTE && socket.room.allPlayersVoted()) {
+            startTally(socket);
+          }
+
+          // Send update to room players if in waiting state
+          if (socket.room.status === Room.STATUS_WAITING) {
+            if (socket.player.admin) {
+              console.log("Transfering host privileges for room code= " + socket.room.code
+                + " to username=" + socket.room.players[0].username);
+              socket.room.players[0].admin = true;
+            }
+            socket.to(socket.room.code).emit("room_waiting_update", socket.room.players);
+          }
+
+          // Game is started and there are not enough players left
+          if (socket.room.status === Room.STATUS_ACTIVE && socket.room.players.length < Room.MIN_PLAYERS) {
+            console.log("Not enough players remain for room with code=" + socket.room.code);
+            socket.room.stopTimeout();
+            socket.nsp.to(socket.room.code).emit("room_abrupt_end", "Last critical player has left the room. There aren't enough players left to continue the game. Please play again.");
+            emptyRoom(socket);
+            manager.deleteRoom(socket.room.code);
+          }
         }
 
-        // Game is started and there are not enough players left
-        if (socket.room.status === Room.STATUS_ACTIVE && socket.room.players.length < Room.MIN_PLAYERS) {
-          console.log("Not enough players remain for room with code=" + socket.room.code);
-          socket.room.stopTimeout();
-          socket.nsp.to(socket.room.code).emit("room_abrupt_end", "Last critical player has left the room. There aren't enough players left to continue the game. Please play again.");
-          emptyRoom(socket);
-          manager.deleteRoom(socket.room.code);
-        }
-        // Game is not started but nobody's left
-        else if (socket.room.players.length === 0) {
+        // Nobody's left, delete the room
+        else {
           manager.deleteRoom(socket.room.code);
         }
 
