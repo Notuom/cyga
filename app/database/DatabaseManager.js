@@ -1,6 +1,6 @@
 var util = require('util');
 var pg = require('pg');
-async = require("async");
+var async = require("async");
 var query = require('pg-query');
 var Q = require('q');
 pg.defaults.ssl = true;

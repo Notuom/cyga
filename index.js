@@ -30,13 +30,6 @@ var bodyParser = require('body-parser');
 server.listen(config.port, function () {
   console.log('Server listening on http://localhost:%d/', config.port);
 });
-app.use(express.static(__dirname + '/public'));
-
-//
-// Routing HTTP server and views
-//
-app.use('/users', accountRoutes);
-app.use('/admin', adminRoutes);
 
 // Session and login
 app.use(cookieParser());
@@ -65,6 +58,14 @@ app.use(function(req, res, next){
 
 app.set('views', __base + 'views/');
 app.set('view engine', 'pug');
+
+//
+// Routing HTTP server and views
+//
+app.use(express.static(__dirname + '/public'));
+app.use('/users', accountRoutes);
+app.use('/admin', adminRoutes);
+
 
 //========================= Passport Strategy ===============================
 // Passport session setup.
@@ -126,11 +127,6 @@ passport.use('signin', new LocalStrategy(
   }
 ));
 //===========================================================================
-
-
-// Routes
-app.use(express.static(__dirname + '/public'));
-app.use('/users',accountRoutes);
 
 //
 // WebSockets server
