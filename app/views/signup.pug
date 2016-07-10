@@ -1,0 +1,21 @@
+extends ./layout.pug
+
+block title
+    title Sign Up Page
+
+block content
+    #signup
+        include ./messageHandling.pug
+        form.form-horizontal(method='post', action='/users/reg')
+            h2.form-signin-heading Register Your Account
+            .form-group
+                label(class='col-sm-2 control-label',for='inputUsername') Username
+                .col-sm-10
+                    input(type='text', name='username', id='inputUsername',class='form-control',placeholder='Username',pattern='.{4,20}', required, title='You need to have between 4 to  20 characters')
+            .form-group
+                label(class='col-sm-2 control-label', for='inputPassword') Password
+                .col-sm-10
+                    input(type='password', name='password', id='inputPassword',class='form-control',placeholder='Password',pattern='.{4,50}', required, title='You need to have between 4 to  50 characters')
+            .form-group
+                div(class='col-sm-offset-2 col-sm-10')
+                    input(type='submit',class='btn btn-lg btn-primary btn-block', value='Sign Up')

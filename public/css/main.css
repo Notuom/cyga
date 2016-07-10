@@ -1,4 +1,4 @@
-/* Game */
+/* Game Css */
 h1 i {
   font-size: 40px;
 }
@@ -17,17 +17,21 @@ h1 i {
   text-align: center;
 }
 
-#game-round-description-timer {
-  font-size: 30px;
-  font-weight: bold;
-  margin: 0 5px;
+.winner-icon {
+  margin-right: 5px;
 }
 
 #game-over-container {
   text-align: center;
 }
 
-/* Lobby */
+#game-round-description-timer {
+  font-size: 30px;
+  font-weight: bold;
+  margin: 0 5px;
+}
+
+/* Lobby Css */
 #room-list .room-join-code {
   margin-right: 10px;
 }
@@ -45,7 +49,9 @@ h1 i {
   background-color: #818a91;
 }
 
-.winner-icon {
-  margin-right: 5px;
+/* Login Css */
+#login, #signup {
+  width : 780px;
+  margin : 0 auto;
 }
 

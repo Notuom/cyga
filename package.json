@@ -16,9 +16,17 @@
   "license": "UNLICENSED",
   "dependencies": {
     "async": "^2.0.0-rc.6",
+    "bcryptjs": "^2.3.0",
+    "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.3",
     "express": "^4.13.4",
+    "express-session": "^1.14.0",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "pg": "6.0.0",
+    "pg-query": "^0.11.0",
     "pug": "^2.0.0-beta3",
+    "q": "^1.4.1",
     "socket.io": "^1.4.6"
   },
   "jshintConfig": {
