@@ -6,8 +6,8 @@ block content
     nav(class="navbar navbar-default")
         .container-fluid
             .nav-bar-header
-                button(type="button", class="btn btn-default navbar-btn")
-                    a(href="/users/logout") Logout
+                .navbar-right
+                    a(class="btn btn-danger navbar-btn", href="/users/logout", role="button") Logout
     h2 Account of !{user.username}
 
     if user.type == 'admin'

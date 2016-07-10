@@ -72,7 +72,6 @@ DatabaseManager.prototype.getUserByUsername = function getUserByUsername(usernam
   var deferred = Q.defer();
   query.first('SELECT userid, username, password, usertype as type FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
     if (err) {
-      console.log(err);
       throw err;
     } else {
       if (typeof(result) !== "undefined") {

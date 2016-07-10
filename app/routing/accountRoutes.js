@@ -28,7 +28,7 @@ router.post('/reg', passport.authenticate('signup', {
 
 router.post('/signin', passport.authenticate('signin', {
         successRedirect: '/users/account',
-        failureRedirect: '/users/signup'
+        failureRedirect: '/users/login'
     })
 );
 
@@ -44,8 +44,8 @@ router.get('/logout', function(req, res){
     var name = req.user.username;
     console.log("LOGGIN OUT " + req.user.username)
     req.logout();
-    res.redirect('/users/login');
     req.session.notice = "You have successfully been logged out " + name + "!";
+    res.redirect('/users/login');
 });
 
 module.exports = router;
