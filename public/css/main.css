@@ -55,3 +55,8 @@ h1 i {
   margin : 0 auto;
 }
 
+/* Account Css */
+.offset-right {
+  margin-right: 10px;
+}
+

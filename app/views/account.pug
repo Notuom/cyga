@@ -3,11 +3,8 @@ block title
     title Account Page
 
 block content
-    nav(class="navbar navbar-default")
-        .container-fluid
-            .nav-bar-header
-                .navbar-right
-                    a(class="btn btn-danger navbar-btn", href="/users/logout", role="button") Logout
+    include ./nav.pug
+    include ./messageHandling.pug
     h2 Account of !{user.username}
 
     if user.type == 'admin'
