@@ -1,7 +1,16 @@
 extends ./layout.pug
-
 block title
     title Account Page
 
 block content
-    h2 Account
+    nav(class="navbar navbar-default")
+        .container-fluid
+            .nav-bar-header
+                button(type="button", class="btn btn-default navbar-btn")
+                    a(href="/users/logout") Logout
+    h2 Account of !{user.username}
+
+    if user.type == 'admin'
+        p You are an admin
+    else
+        p You are a user

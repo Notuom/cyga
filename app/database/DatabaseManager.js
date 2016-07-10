@@ -1,6 +1,7 @@
 var util = require('util');
 var pg = require('pg');
 var query = require('pg-query');
+var Q = require('q');
 pg.defaults.ssl = true;
 
 var config = require(__base + 'config');
@@ -32,6 +33,7 @@ DatabaseManager.prototype.getRandomAcronyms = function getRandomAcronyms(size, c
         return new Acronym(row.acronym, row.definition);
       });
       callback(acronyms);
+      client.end();
     }
   });
 };
@@ -42,11 +44,11 @@ DatabaseManager.prototype.getRandomAcronyms = function getRandomAcronyms(size, c
  * @return boolean
  */
 DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
+  var deferred = Q.defer();
   query.first('SELECT username FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
-    //return typeof result == "undefined";
-    console.log(result);
+    deferred.resolve(typeof(result) !== "undefined");
   });
-  return true;
+  return deferred.promise;
 };
 
 /**
@@ -54,9 +56,33 @@ DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
  * @param user
  */
 DatabaseManager.prototype.insertNewUser = function insertNewUser(user) {
-  query('INSERT INTO users FROM log515_cyga.users (username, password, usertype) VALUES ($1, $2, user)', [user.username, user.password], function(err, result) {
-    console.log(result);
+  var deferred = Q.defer();
+  query('INSERT INTO log515_cyga.users (username, password, usertype) VALUES ($1, $2, $3)', [user.username, user.password, user.type], function(err, result) {
+    if (err) {
+      throw err;
+    } else {
+      console.log("result : " + result);
+      deferred.resolve(user);
+    }
   });
+  return deferred.promise;
 };
 
+DatabaseManager.prototype.getUserByUsername = function getUserByUsername(username) {
+  var deferred = Q.defer();
+  query.first('SELECT userid, username, password, usertype as type FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
+    if (err) {
+      console.log(err);
+      throw err;
+    } else {
+      if (typeof(result) !== "undefined") {
+        deferred.resolve(result);
+      } else {
+        deferred.resolve(false);
+      }
+    }
+  });
+
+  return deferred.promise;
+};
 module.exports = DatabaseManager;

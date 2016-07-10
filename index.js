@@ -81,13 +81,10 @@ passport.use('signup', new LocalStrategy(
     {passReqToCallback : true},
     function(req, username, password, done) {
       console.log('test signup');
-      console.log('test req : '+ req);
       console.log('test username : ' + username);
       console.log('test password : ' + password);
-      console.log('test done : ' + done);
       loginHelper.localReg(username, password)
        .then(function (user) {
-         console.log(user);
        if (user) {
          console.log("REGISTERED: " + user.username);
          req.session.success = 'You are successfully registered and logged in ' + user.username + '!';
@@ -103,6 +100,29 @@ passport.use('signup', new LocalStrategy(
          console.log(err.body);
        });
     }
+));
+
+passport.use('signin', new LocalStrategy(
+  {passReqToCallback : true}, //allows us to pass back the request to the callback
+  function(req, username, password, done) {
+    console.log("login test");
+    loginHelper.localAuth(username, password)
+      .then(function (user) {
+        if (user) {
+          console.log("LOGGED IN AS: " + user.username);
+          req.session.success = 'You are successfully logged in ' + user.username + '!';
+          done(null, user);
+        }
+        if (!user) {
+          console.log("COULD NOT LOG IN");
+          req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
+          done(null, user);
+        }
+      })
+      .fail(function (err){
+        console.log(err.body);
+      });
+  }
 ));
 //===========================================================================
 
