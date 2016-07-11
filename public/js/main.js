@@ -9,6 +9,15 @@ $(function () {
   var currentDescriptionTime = 0;
   var descriptionInterval = null;
 
+  /**
+   * User logged In connection
+   */
+  var username = $('#user input').val();
+  if (username !== 'none') {
+    var data = {username : username, verifyBD : false};
+    socket.emit('user_connection_request', data);
+  }
+
   /*
    * User interactions
    */
@@ -19,7 +28,8 @@ $(function () {
 
     username = $("#connection-username").val();
     if (username.trim() !== "") {
-      socket.emit("user_connection_request", username);
+      var data = {username : username, verifyBD : true};
+      socket.emit("user_connection_request", data);
     } else {
       alert("Please enter a username.");
     }

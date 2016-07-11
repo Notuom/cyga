@@ -26,8 +26,7 @@ block content
               i(class='glyphicon glyphicon-user')
               | Login Here
     // Join room form
-    - var hide = user ? '' : 'hidden'
-    form#room-join-form(class='form game-panel', action='/', method='post', hide)
+    form#room-join-form(class='form game-panel', action='/', method='post', hidden=user ? false : true)
       if user
         h2 Create a room
         label(class='control-label', for='room-create-turns') Number of turns
@@ -55,48 +54,48 @@ block content
         i(class='glyphicon glyphicon-ok')
         | Start game
 
-      // Game round panel
-      form(action='/', method='post', id='game-round-form', class='game-panel' hidden)
-        h2 Room
-          span.room-code {{code}}
-        h3 Round
-          span.game-round-round {{round}} /
-          span.game-round-turns {{turns}}
-        h4.game-round-acronym {{acronym}}
-        h5.game-round-acronym-description
+    // Game round panel
+    form(action='/', method='post', id='game-round-form', class='game-panel', hidden)
+      h2 Room
+        span.room-code {{code}}
+      h3 Round
+        span.game-round-round {{round}} /
+        span.game-round-turns {{turns}}
+      h4.game-round-acronym {{acronym}}
+      h5.game-round-acronym-description
 
-        // 1. Description
-        .game-round-description-container
-          #game-round-description-timer-container
-            You have
-            span#game-round-description-timer 0
-            seconds left
-          input(type='text', class='form-control', id='game-round-description', placeholder='Enter description...')
-          button(id='game-round-submit', type='submit', class='btn btn-primary')
-            i(class='glyphicon glyphicon-tag')
-            | Submit
+      // 1. Description
+      .game-round-description-container
+        #game-round-description-timer-container
+          You have
+          span#game-round-description-timer 0
+          seconds left
+        input(type='text', class='form-control', id='game-round-description', placeholder='Enter description...')
+        button(id='game-round-submit', type='submit', class='btn btn-primary')
+          i(class='glyphicon glyphicon-tag')
+          | Submit
 
-        // 2. Vote
-        #game-round-voting-container(class='list-group', hidden)
+      // 2. Vote
+      #game-round-voting-container(class='list-group', hidden)
 
-        // 3. Tally (score board)
-        table#game-round-tally-container(class='table', hidden)
-          thead
-            tr
-              th Player
-              th Answer
-              th Votes
-              th Score
-          tbody#game-round-tally
+      // 3. Tally (score board)
+      table#game-round-tally-container(class='table', hidden)
+        thead
+          tr
+            th Player
+            th Answer
+            th Votes
+            th Score
+        tbody#game-round-tally
 
-        // 4. Game Over
-        #game-over-container(hidden)
-          h4 Game over!
-          h5 Winner:
-            span#game-over-winner
-          button(id='btn-replay', class='btn btn-primary')
-            i(class='glyphicon glyphicon-repeat')
-            | Play again
+      // 4. Game Over
+      #game-over-container(hidden)
+        h4 Game over!
+        h5 Winner:
+          span#game-over-winner
+        button(id='btn-replay', class='btn btn-primary')
+          i(class='glyphicon glyphicon-repeat')
+          | Play again
 
     // Disconnect message panel
     #disconnect-panel(class='panel panel-danger', hidden)
@@ -106,3 +105,5 @@ block content
         You have been disconnected from the server.
           a(href='/') Click here
         to start over.
+    #user(hidden)
+      input(type='hidden', name='username', value= user ? user.username : 'none')
