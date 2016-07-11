@@ -2,10 +2,6 @@ var express = require('express');
 var router = express.Router();
 var DatabaseManager = require('../database/DatabaseManager');
 
-router.get('/', function(req, res) {
-  res.redirect('/acronym');
-});
-
 router.get('/acronym',function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated() && req.user.type == 'admin') {
     return next();

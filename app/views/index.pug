@@ -1,21 +1,108 @@
 extends ./layout.pug
 
 block title
-    title Login Page
+    title CYGA
 
 block content
-    #login
-        include ./messageHandling.pug
-        form.form-horizontal(method='post', action='/users/signin')
-            h2.form-signin-heading Login
-            .form-group
-                label(class='col-sm-2 control-label',for='inputUsername') Username
-                .col-sm-10
-                    input(type='text', name='username',id='inputUsername',class='form-control',placeholder='Username',pattern='.{4,20}', required, title='You need to have between 4 to  20 characters')
-            .form-group
-                label(class='col-sm-2 control-label', for='inputPassword') Password
-                .col-sm-10
-                    input(type='password', name='password',id='inputPassword',class='form-control',placeholder='Password',pattern='.{4,50}',required, title='You need to have between 4 to  50 characters')
-            .form-group
-                div(class='col-sm-offset-2 col-sm-10')
-                    input(type='submit',class='btn btn-lg btn-primary btn-block', value='Sign In')
+  .container
+    h1
+      i(class='glyphicon glyphicon-tag')
+      abbr(title='Can You Guess the Acronym') CYGA
+
+    // Login Form
+    if !user
+      form#connection-form(class='form game-panel', action='/', method='post')
+        .row
+          .col-sm-3
+            input(type='text', id='connection-username', name='username', placeholder='Enter username...', class='form-control', autofocus)
+          .col-sm-2
+            button(type='submit', id='connection-submit', name='connection-submit', class='btn btn-primary')
+              i(class='glyphicon glyphicon-tag')
+              | Start session
+          .col-sm-1
+            span OR
+          .col-sm-2
+            a(href='/users/login', class='btn btn-primary')
+              i(class='glyphicon glyphicon-user')
+              | Login Here
+    // Join room form
+    - var hide = user ? '' : 'hidden'
+    form#room-join-form(class='form game-panel', action='/', method='post', hide)
+      if user
+        h2 Create a room
+        label(class='control-label', for='room-create-turns') Number of turns
+        // TODO remettre min. 10 tours, je fais des tests avec 3
+        input(class='form-control', type='number', id='room-create-turns', min='3', max='50', value='10')
+        button(type='submit', id='room-create', name='room-create', class='btn btn-success')
+          i(class='glyphicon glyphicon-plus')
+          | Create room
+      h2 LOBBY - Join a room (
+        span#number-of-rooms 0
+        | )
+      .row
+        ul#room-list(class='list-group')
+
+    // Waiting room
+    form#room-waiting-form(class='form game-panel', action='/', method='post', hidden)
+      h2 Room
+        span.room-code {{code}}
+      table(class='table table-striped')
+        thead
+          tr
+            th Players
+        tbody#room-waiting-players
+      button(type='submit', id='room-waiting-go', name='room-waiting-go', class='btn btn-success' hidden)
+        i(class='glyphicon glyphicon-ok')
+        | Start game
+
+      // Game round panel
+      form(action='/', method='post', id='game-round-form', class='game-panel' hidden)
+        h2 Room
+          span.room-code {{code}}
+        h3 Round
+          span.game-round-round {{round}} /
+          span.game-round-turns {{turns}}
+        h4.game-round-acronym {{acronym}}
+        h5.game-round-acronym-description
+
+        // 1. Description
+        .game-round-description-container
+          #game-round-description-timer-container
+            You have
+            span#game-round-description-timer 0
+            seconds left
+          input(type='text', class='form-control', id='game-round-description', placeholder='Enter description...')
+          button(id='game-round-submit', type='submit', class='btn btn-primary')
+            i(class='glyphicon glyphicon-tag')
+            | Submit
+
+        // 2. Vote
+        #game-round-voting-container(class='list-group', hidden)
+
+        // 3. Tally (score board)
+        table#game-round-tally-container(class='table', hidden)
+          thead
+            tr
+              th Player
+              th Answer
+              th Votes
+              th Score
+          tbody#game-round-tally
+
+        // 4. Game Over
+        #game-over-container(hidden)
+          h4 Game over!
+          h5 Winner:
+            span#game-over-winner
+          button(id='btn-replay', class='btn btn-primary')
+            i(class='glyphicon glyphicon-repeat')
+            | Play again
+
+    // Disconnect message panel
+    #disconnect-panel(class='panel panel-danger', hidden)
+      .panel-heading
+        h3 Disconnected
+      .panel-body
+        You have been disconnected from the server.
+          a(href='/') Click here
+        to start over.

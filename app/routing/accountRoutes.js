@@ -2,13 +2,9 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 
-router.get('/', function(req, res) {
-    res.redirect('/users/login');
-});
-
 router.get('/login', function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.render('index');
+  res.render('login');
 }, function(req, res) {
   res.redirect('/users/account');
 });

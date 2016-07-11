@@ -2,6 +2,9 @@
 h1 i {
   font-size: 40px;
 }
+.glyphicon {
+  margin-right: 5px;
+}
 
 #room-create, #game-round-submit {
   margin-top: 15px;
