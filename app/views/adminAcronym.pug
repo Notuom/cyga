@@ -35,13 +35,13 @@ block content
     div.row.component-row
       div.col-xs-12.col-sm-2
         button#update-acronyms.btn.btn-primary
-          echo Sauvegarder
+          echo Save
       div.col-xs-12.col-sm-2
         button#add-acronym.btn.btn-primary
-          echo Ajouter
+          echo Add
     div#acronym-edit-panel.panel.panel-default
       div.panel-heading
-        echo Ajouter un acronyme
+        echo Add an acronym
       div.panel-body
         form#acronym-changes-form
           input(type="hidden" value="")#edit-acronym-action
@@ -52,9 +52,9 @@ block content
             div.col-xs-12
               input(type='text' name='definition' placeholder='Définition' required)#edit-definition-input.full-width
             div.col-xs-12
-              input(type='submit' value='Sauvegarder')#save-acronym-changes.btn.btn-primary.full-width
+              input(type='submit' value='Save')#save-acronym-changes.btn.btn-primary.full-width
             div.col-xs-12
               button#cancel-acronym-changes.btn.btn-primary.full-width
-                echo Annuler
+                echo Cancel
 block footer
   script(src='../../js/admin.js')
