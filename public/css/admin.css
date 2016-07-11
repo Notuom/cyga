@@ -50,6 +50,10 @@ i.delete-acronym:hover {
   pointer-events: none;
 }
 
+input[type="text"][disabled="disabled"] {
+    color: #cccccc;
+}
+
 .full-width {
   width: 100%;
 }
