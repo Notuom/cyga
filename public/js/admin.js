@@ -63,7 +63,7 @@ $(function () {
 
 function acronymEditPanelVisible(show) {
   if($('#edit-acronym-action').val() == 'insert') {
-    updateAcronymChanges('','');
+    clearAcronymChanges();
     $('#acronym-edit-panel .panel-heading').html('Ajouter un acronyme');
   }else if($('#edit-acronym-action').val() == 'edit')
     $('#acronym-edit-panel .panel-heading').html('Modifier un acronyme');
