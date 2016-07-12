@@ -31,7 +31,7 @@ block content
         h2 Create a room
         label(class='control-label', for='room-create-turns') Number of turns
         // TODO remettre min. 10 tours, je fais des tests avec 3
-        input(class='form-control', type='number', id='room-create-turns', min='3', max='50', value='10')
+        input(class='form-control', type='number', id='room-create-turns', min='1', max='50', value='1')
         button(type='submit', id='room-create', name='room-create', class='btn btn-success')
           i(class='glyphicon glyphicon-plus')
           | Create room
@@ -57,10 +57,11 @@ block content
     // Game round panel
     form(action='/', method='post', id='game-round-form', class='game-panel', hidden)
       h2 Room
-        span.room-code {{code}}
+        span.room-code code
       h3 Round
-        span.game-round-round {{round}} /
-        span.game-round-turns {{turns}}
+        span.game-round-round round
+        | /
+        span.game-round-turns turns
       h4.game-round-acronym {{acronym}}
       h5.game-round-acronym-description
 
@@ -91,7 +92,7 @@ block content
       // 4. Game Over
       #game-over-container(hidden)
         h4 Game over!
-        h5 Winner:
+        h5 Winner : 
           span#game-over-winner
         button(id='btn-replay', class='btn btn-primary')
           i(class='glyphicon glyphicon-repeat')

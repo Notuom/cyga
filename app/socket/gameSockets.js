@@ -309,16 +309,28 @@ function startTally(socket) {
 
   // Game is ended: send message to show that was the last round, delete room
   if (socket.room.isGameEnded()) {
+    console.log('fin de partie');
+    // Create the gameId room in DB
+    db.createNewGameID()
+      .then(function(gameid){
+        console.log('gameId : ' + gameid);
+        // Save connected user scores
+        for (var i = 0; i < tally.length; i++) {
+          var username = tally[i].username;
+          var playerScore = tally[i].gameScore;
+          db.insertScoreByUsernameAndGameID(gameid, username, playerScore);
+        }
 
-    // Send tally while also indicating the game has ended
-    socket.nsp.to(socket.room.code).emit("room_end", tally, description);
+        // Send tally while also indicating the game has ended
+        socket.nsp.to(socket.room.code).emit("room_end", tally, description);
 
-    // Make all clients leave room
-    emptyRoom(socket);
+        // Make all clients leave room
+        emptyRoom(socket);
 
-    // Delete room from game manager and remove from lobby
-    manager.deleteRoom(socket.room.code);
-    manager.refreshLobby(socket);
+        // Delete room from game manager and remove from lobby
+        manager.deleteRoom(socket.room.code);
+        manager.refreshLobby(socket);
+      });
   }
 
   // Game is not ended: send message to show tally and set a timeout to begin next round

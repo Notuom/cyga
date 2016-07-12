@@ -120,7 +120,7 @@ DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
  */
 DatabaseManager.prototype.insertNewUser = function insertNewUser(user) {
   var deferred = Q.defer();
-  query('INSERT INTO log515_cyga.users (username, password, usertype) VALUES ($1, $2, $3) RETURNING userid;', [user.username, user.password, user.type], function(err, result) {
+  query('INSERT INTO log515_cyga.users (username, password, usertype) VALUES ($1, $2, $3) RETURNING userid', [user.username, user.password, user.type], function(err, result) {
     if (err) {
       throw err;
     } else {
@@ -140,7 +140,8 @@ DatabaseManager.prototype.getUserByUsername = function getUserByUsername(usernam
   var deferred = Q.defer();
   query.first('SELECT userid, username, password, usertype as type FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
     if (err) {
-      throw err;
+      //throw err;
+      console.log(err);
     } else {
       if (typeof(result) !== "undefined") {
         deferred.resolve(result);
@@ -154,18 +155,43 @@ DatabaseManager.prototype.getUserByUsername = function getUserByUsername(usernam
 };
 
 /**
- *
- * @returns {*}
+ * Create a new gameid in the DB
+ * @return gameid
  */
 DatabaseManager.prototype.createNewGameID = function createNewGameID() {
   var deferred = Q.defer();
-  query('INSERT INTO log515_cyga.game (winnerid) VALUES (0) RETURNING gameid;', function(err, result) {
+  query('INSERT INTO log515_cyga.game DEFAULT VALUES RETURNING gameid', function(err, result) {
     if (err) {
-      throw err;
+      //throw err;
+      console.log(err);
     } else {
-      deferred.resolve(result.gameid);
+      console.log(result);
+      console.log(result[0].gameid);
+      deferred.resolve(result[0].gameid);
     }
   });
   return deferred.promise;
+};
+
+/**
+ * Insert the user score at the end of a game
+ * @param gameid
+ * @param username
+ * @param score
+ */
+DatabaseManager.prototype.insertScoreByUsernameAndGameID = function insertScoreByUsernameAndGameID(gameid, username, score) {
+  console.log(gameid, username, score);
+  this.getUserByUsername(username)
+    .then(function(user){
+      console.log(user);
+      if (user) {
+        query('INSERT INTO log515_cyga.game_users (score, gameid, userid) VALUES ($1, $2, $3)', [score, gameid, user.userid], function (err, result) {
+          if (err) {
+            //throw err;
+            console.log(err);
+          }
+        });
+      }
+  });
 };
 module.exports = DatabaseManager;

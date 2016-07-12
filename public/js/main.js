@@ -305,7 +305,6 @@ $(function () {
     }
 
     if (isGameOver) {
-      // Save score in DB
 
       // Find max score
       var maxScore = 0;
