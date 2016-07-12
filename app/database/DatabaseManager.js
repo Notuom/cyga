@@ -194,4 +194,47 @@ DatabaseManager.prototype.insertScoreByUsernameAndGameID = function insertScoreB
       }
   });
 };
+
+/**
+ * Get all the games played by the user
+ * @param userid
+ * @returns Array | Boolean
+ */
+DatabaseManager.prototype.getAllGamePlayedByUserID = function getAllGamePlayedByUserID(userid) {
+  var deferred = Q.defer();
+  query('SELECT g.*, gu.score  FROM log515_cyga.game g INNER JOIN game_users gu ON (g.gameid = gu.gameid) WHERE gu.userid = $1 AND g.gamedate >= NOW() - INTERVAL "7 days"', userid, function(err, result) {
+    if (err) {
+      //throw err;
+      console.log(err);
+    } else {
+      if (typeof(result) !== "undefined") {
+        deferred.resolve(result);
+      } else {
+        deferred.resolve(false);
+      }
+    }
+  });
+
+  return deferred.promise;
+};
+
+/**
+ * Get all the summed scores for player in TOP 10
+ * @param userid
+ * @returns Array | Boolean
+ */
+DatabaseManager.prototype.getTop5BestPLayer = function getTop5BestPLayer() {
+  var deferred = Q.defer();
+  query('SELECT DISTINCT ON (u.username) u.username, SUM(gu.score) as total  FROM log515_cyga.user u INNER JOIN game_users gu ON (u.userid = gu.userid) LIMIT 5', userid, function(err, result) {
+    if (err) {
+      //throw err;
+      console.log(err);
+    } else {
+      deferred.resolve(result);
+    }
+  });
+
+  return deferred.promise;
+};
+
 module.exports = DatabaseManager;
