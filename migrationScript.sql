@@ -17,7 +17,6 @@ CREATE TABLE Users
 CREATE TABLE Game
 (
   gameId SERIAL PRIMARY KEY,
-  winnerId INTEGER NOT NULL REFERENCES Users(userId),
   gameDate TIMESTAMP DEFAULT current_timestamp(2)
 );
 
