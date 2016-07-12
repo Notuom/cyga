@@ -120,17 +120,22 @@ DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
  */
 DatabaseManager.prototype.insertNewUser = function insertNewUser(user) {
   var deferred = Q.defer();
-  query('INSERT INTO log515_cyga.users (username, password, usertype) VALUES ($1, $2, $3)', [user.username, user.password, user.type], function(err, result) {
+  query('INSERT INTO log515_cyga.users (username, password, usertype) VALUES ($1, $2, $3) RETURNING userid;', [user.username, user.password, user.type], function(err, result) {
     if (err) {
       throw err;
     } else {
-      console.log("result : " + result);
+      user.userid = result.userid;
       deferred.resolve(user);
     }
   });
   return deferred.promise;
 };
 
+/**
+ * Retrieve the user by username in the database
+ * @param username
+ * @returns {*|promise}
+ */
 DatabaseManager.prototype.getUserByUsername = function getUserByUsername(username) {
   var deferred = Q.defer();
   query.first('SELECT userid, username, password, usertype as type FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
@@ -145,6 +150,22 @@ DatabaseManager.prototype.getUserByUsername = function getUserByUsername(usernam
     }
   });
 
+  return deferred.promise;
+};
+
+/**
+ *
+ * @returns {*}
+ */
+DatabaseManager.prototype.createNewGameID = function createNewGameID() {
+  var deferred = Q.defer();
+  query('INSERT INTO log515_cyga.game (winnerid) VALUES (0) RETURNING gameid;', function(err, result) {
+    if (err) {
+      throw err;
+    } else {
+      deferred.resolve(result.gameid);
+    }
+  });
   return deferred.promise;
 };
 module.exports = DatabaseManager;

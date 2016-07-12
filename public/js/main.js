@@ -13,7 +13,7 @@ $(function () {
    * User logged In connection
    */
   var username = $('#user input').val();
-  if (username !== 'none') {
+  if (typeof(username) !== 'undefined' && username !== 'none') {
     var data = {username : username, verifyBD : false};
     socket.emit('user_connection_request', data);
   }
@@ -190,7 +190,7 @@ $(function () {
   });
 
   // Game is over: show final tally, declare winner
-  socket.on("room_end", function (tally, description) {
+  socket.on("room_end", function (tally, description, gameid) {
     showTally(tally, description, true);
   });
 
@@ -305,6 +305,7 @@ $(function () {
     }
 
     if (isGameOver) {
+      // Save score in DB
 
       // Find max score
       var maxScore = 0;
