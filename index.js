@@ -11,6 +11,7 @@ var io = require('socket.io')(server);
 // Routing handlers
 var accountRoutes = require(__base + '/routing/accountRoutes');
 var adminRoutes = require(__base + '/routing/adminRoutes');
+var gameRoutes = require(__base + '/routing/gameRoutes');
 
 // Socket handlers
 var adminSockets = require(__base + '/socket/adminSockets');
@@ -65,7 +66,7 @@ app.set('view engine', 'pug');
 app.use(express.static(__dirname + '/public'));
 app.use('/users', accountRoutes);
 app.use('/admin', adminRoutes);
-
+app.use('/', gameRoutes);
 
 //========================= Passport Strategy ===============================
 // Passport session setup.

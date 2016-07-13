@@ -12,36 +12,28 @@ var DatabaseManager = require(__base + 'database/DatabaseManager');
 var db = new DatabaseManager();
 
 var gameSockets = function gameSockets(socket) {
-
   // Register player
-  socket.on('user_connection_request', function (username) {
+  socket.on('user_connection_request', function (data) {
+    var username = data.username;
+    var existInDB = false;
     console.log('"user_connection_request" received with username=' + username);
-
+    console.log(data.verifyBD);
     // Username does not exist yet in any game
-    if (!manager.playerExists(username)) {
-      manager.addPlayer(username);
-      socket.player = new Player(username);
-      socket.join("lobby");
-
-      // Create each room in the lobby (HTML)
-      var allRooms = manager.getAllRooms();
-      allRooms.forEach(function (room) {
-        var currentRoom = {
-          status: room.status,
-          code: room.code,
-          current_players: room.getAllCurrentPlayers(),
-          max_player: room.getMaxPlayers()
-        };
-        socket.emit('show_lobby', currentRoom);
-      });
-
-      socket.emit('user_connection_success');
-    }
-
-    // Username already exists
-    else {
-      socket.emit('generic_error', "Username " + username + " is already taken. Please select another username.");
-      console.log("User rejected (username already exists).");
+    if (data.verifyBD) {
+      console.log("check ?");
+      db.isUsernameTaken(username)
+        .then(function(isTaken){
+          if (isTaken) {
+            socket.emit('generic_error', "Username " + username + " is already taken. Please select another username.");
+            console.log("User rejected (username already exists).");
+          } else {
+            addPlayerToGame(socket, username);
+            console.log(socket.player);
+          }
+        });
+    } else {
+      addPlayerToGame(socket, username);
+      console.log(socket.player);
     }
   });
 
@@ -317,16 +309,28 @@ function startTally(socket) {
 
   // Game is ended: send message to show that was the last round, delete room
   if (socket.room.isGameEnded()) {
+    console.log('fin de partie');
+    // Create the gameId room in DB
+    db.createNewGameID()
+      .then(function(gameid){
+        console.log('gameId : ' + gameid);
+        // Save connected user scores
+        for (var i = 0; i < tally.length; i++) {
+          var username = tally[i].username;
+          var playerScore = tally[i].gameScore;
+          db.insertScoreByUsernameAndGameID(gameid, username, playerScore);
+        }
 
-    // Send tally while also indicating the game has ended
-    socket.nsp.to(socket.room.code).emit("room_end", tally, description);
+        // Send tally while also indicating the game has ended
+        socket.nsp.to(socket.room.code).emit("room_end", tally, description);
 
-    // Make all clients leave room
-    emptyRoom(socket);
+        // Make all clients leave room
+        emptyRoom(socket);
 
-    // Delete room from game manager and remove from lobby
-    manager.deleteRoom(socket.room.code);
-    manager.refreshLobby(socket);
+        // Delete room from game manager and remove from lobby
+        manager.deleteRoom(socket.room.code);
+        manager.refreshLobby(socket);
+      });
   }
 
   // Game is not ended: send message to show tally and set a timeout to begin next round
@@ -366,5 +370,34 @@ function emptyRoom(socket) {
       }
     }
   }
+}
+
+function addPlayerToGame(socket, username) {
+  if (!manager.playerExists(username)) {
+    manager.addPlayer(username);
+    socket.player = new Player(username);
+    socket.join("lobby");
+
+    // Create each room in the lobby (HTML)
+    var allRooms = manager.getAllRooms();
+    allRooms.forEach(function (room) {
+      var currentRoom = {
+        status: room.status,
+        code: room.code,
+        current_players: room.getAllCurrentPlayers(),
+        max_player: room.getMaxPlayers()
+      };
+      socket.emit('show_lobby', currentRoom);
+    });
+
+    socket.emit('user_connection_success');
+  }
+
+  // Username already exists
+  else {
+    socket.emit('generic_error', "Username " + username + " is already taken. Please select another username.");
+    console.log("User rejected (username already exists).");
+  }
+
 }
 module.exports = gameSockets;
