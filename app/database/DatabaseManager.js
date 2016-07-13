@@ -124,7 +124,7 @@ DatabaseManager.prototype.insertNewUser = function insertNewUser(user) {
     if (err) {
       throw err;
     } else {
-      user.userid = result.userid;
+      user.userid = result[0].userid;
       deferred.resolve(user);
     }
   });
