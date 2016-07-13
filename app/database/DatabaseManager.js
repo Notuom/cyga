@@ -202,14 +202,22 @@ DatabaseManager.prototype.insertScoreByUsernameAndGameID = function insertScoreB
  */
 DatabaseManager.prototype.getAllGamePlayedByUserID = function getAllGamePlayedByUserID(userid) {
   var deferred = Q.defer();
-  query('SELECT g.*, gu.score  FROM log515_cyga.game g INNER JOIN game_users gu ON (g.gameid = gu.gameid) WHERE gu.userid = $1 AND g.gamedate >= NOW() - INTERVAL "7 days"', userid, function(err, result) {
+  console.log(userid);
+  query('SELECT TO_CHAR(g.gamedate,\'DD Mon YYYY\') as gamedate, gu.score  FROM log515_cyga.game g INNER JOIN log515_cyga.game_users gu ON (g.gameid = gu.gameid) WHERE gu.userid = '+userid+' AND g.gamedate >= NOW() - INTERVAL \'7 days\'', function(err, result) {
     if (err) {
       //throw err;
       console.log(err);
     } else {
       if (typeof(result) !== "undefined") {
+        console.log(result);
+        /*var games = result.map(function (row) {
+          return {gamedate:row.gamedate, score: row.score};
+        });
+        console.log(games);*/
+
         deferred.resolve(result);
       } else {
+        console.log("No score");
         deferred.resolve(false);
       }
     }
@@ -219,17 +227,22 @@ DatabaseManager.prototype.getAllGamePlayedByUserID = function getAllGamePlayedBy
 };
 
 /**
- * Get all the summed scores for player in TOP 10
+ * Get all the summed scores for player in TOP 5
  * @param userid
  * @returns Array | Boolean
  */
-DatabaseManager.prototype.getTop5BestPLayer = function getTop5BestPLayer() {
+DatabaseManager.prototype.getTop5BestPlayer = function getTop5BestPlayer() {
   var deferred = Q.defer();
-  query('SELECT DISTINCT ON (u.username) u.username, SUM(gu.score) as total  FROM log515_cyga.user u INNER JOIN game_users gu ON (u.userid = gu.userid) LIMIT 5', userid, function(err, result) {
+  query('SELECT u.username, SUM(gu.score) as total  FROM log515_cyga.users u INNER JOIN log515_cyga.game_users gu ON (u.userid = gu.userid) GROUP BY u.username ORDER BY total DESC LIMIT 5', function(err, result) {
     if (err) {
       //throw err;
       console.log(err);
     } else {
+      console.log(result);
+     /* var bestPlayers = result.map(function (row) {
+        return {username:row.username, score: row.total};
+      });*/
+      //console.log(bestPlayers);
       deferred.resolve(result);
     }
   });
