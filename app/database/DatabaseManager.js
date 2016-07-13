@@ -203,18 +203,13 @@ DatabaseManager.prototype.insertScoreByUsernameAndGameID = function insertScoreB
 DatabaseManager.prototype.getAllGamePlayedByUserID = function getAllGamePlayedByUserID(userid) {
   var deferred = Q.defer();
   console.log(userid);
-  query('SELECT TO_CHAR(g.gamedate,\'DD Mon YYYY\') as gamedate, gu.score  FROM log515_cyga.game g INNER JOIN log515_cyga.game_users gu ON (g.gameid = gu.gameid) WHERE gu.userid = '+userid+' AND g.gamedate >= NOW() - INTERVAL \'7 days\'', function(err, result) {
+  query('SELECT TO_CHAR(g.gamedate,\'DD Mon YYYY\') as gamedate, gu.score  FROM log515_cyga.game g INNER JOIN log515_cyga.game_users gu ON (g.gameid = gu.gameid) WHERE gu.userid = '+userid+' AND g.gamedate >= NOW() - INTERVAL \'7 days\' ORDER BY g.gamedate DESC', function(err, result) {
     if (err) {
       //throw err;
       console.log(err);
     } else {
       if (typeof(result) !== "undefined") {
         console.log(result);
-        /*var games = result.map(function (row) {
-          return {gamedate:row.gamedate, score: row.score};
-        });
-        console.log(games);*/
-
         deferred.resolve(result);
       } else {
         console.log("No score");
@@ -239,10 +234,6 @@ DatabaseManager.prototype.getTop5BestPlayer = function getTop5BestPlayer() {
       console.log(err);
     } else {
       console.log(result);
-     /* var bestPlayers = result.map(function (row) {
-        return {username:row.username, score: row.total};
-      });*/
-      //console.log(bestPlayers);
       deferred.resolve(result);
     }
   });
