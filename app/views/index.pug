@@ -1,7 +1,7 @@
 extends ./layout.pug
 
 block title
-    title CYGA
+  title CYGA
 
 block content
   if user
@@ -45,7 +45,7 @@ block content
     // Waiting room
     form#room-waiting-form(class='form game-panel', action='/', method='post', hidden)
       h2 Room
-        | #
+        |  #
         span.room-code {{code}}
       table(class='table table-striped')
         thead
@@ -59,10 +59,10 @@ block content
     // Game round panel
     form(action='/', method='post', id='game-round-form', class='game-panel', hidden)
       h2 Room
-        | #
+        |  #
         span.room-code code
       h3 Round
-        | 
+        |
         span.game-round-round round
         | /
         span.game-round-turns turns
@@ -70,7 +70,7 @@ block content
       h5.game-round-acronym-description
 
       // 1. Description
-      .game-round-description-container
+      #game-round-description-container
         #game-round-description-timer-container
           You have
           span#game-round-description-timer 0

@@ -1,41 +1,41 @@
 extends ./layout.pug
 block title
-    title Account Page
+  title Account Page
 
 block content
-    include ./nav.pug
-    include ./messageHandling.pug
-    .container
-        h2 Account of !{user.username}
+  include ./nav.pug
+  include ./messageHandling.pug
+  .container
+    h2 Account of !{user.username}
 
-        h3 Top 5 best players
-            table(class='table table-striped table-condensed table-hover')
-                thead
-                    tr
-                        th Number
-                        th Player
-                        th Average Score
-                        th Total Score
-                tbody
-                - var count = 1
-                    each player in top5
-                        tr
-                            td !{count++}
-                            td !{player.username}
-                            td !{player.average}
-                            td !{player.total}
+    h3 Top 5 best players
+      table(class='table table-striped table-condensed table-hover')
+        thead
+          tr
+            th Number
+            th Player
+            th Average Score
+            th Total Score
+        tbody
+        - var count = 1
+        each player in top5
+          tr
+            td !{count++}
+            td !{player.username}
+            td !{player.average}
+            td !{player.total}
 
-        h3 Your game for the last 7 days
-            table(class='table table-striped table-condensed table-hover')
-                thead
-                    tr
-                        th Game Date
-                        th Score
-                tbody
-                    each game in gameScore
-                        tr
-                            td !{game.gamedate}
-                            td !{game.score}
+    h3 Your game for the last 7 days
+      table(class='table table-striped table-condensed table-hover')
+        thead
+          tr
+            th Game Date
+            th Score
+        tbody
+          each game in gameScore
+            tr
+              td !{game.gamedate}
+              td !{game.score}
 
 block footer
-    script(src='../../js/account.js')
+  script(src='../../js/account.js')

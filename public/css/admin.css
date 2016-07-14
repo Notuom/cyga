@@ -51,7 +51,7 @@ i.delete-acronym:hover {
 }
 
 input[type="text"][disabled="disabled"] {
-    color: #cccccc;
+  color: #cccccc;
 }
 
 .full-width {
@@ -68,22 +68,27 @@ table {
   height: 100%;
   width: 100%;
 }
+
 table thead {
   flex: 0 0 auto;
-  width: 100%;/* calc(100% - 0.9em)*/
+  width: 100%; /* calc(100% - 0.9em)*/
 }
+
 table tbody {
   flex: 1 1 auto;
   display: block;
   overflow-y: scroll;
 }
+
 table tbody tr {
   width: 100%;
 }
+
 table thead, table tbody tr {
   display: table;
   table-layout: fixed;
 }
+
 /* END : Utilisation de code */
 
 

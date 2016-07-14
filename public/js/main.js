@@ -14,7 +14,7 @@ $(function () {
    */
   var username = $('#user input').val();
   if (typeof(username) !== 'undefined' && username !== 'none') {
-    var data = {username : username, verifyBD : false};
+    var data = {username: username, verifyBD: false};
     socket.emit('user_connection_request', data);
   }
 
@@ -28,7 +28,7 @@ $(function () {
 
     username = $("#connection-username").val();
     if (username.trim() !== "") {
-      var data = {username : username, verifyBD : true};
+      var data = {username: username, verifyBD: true};
       socket.emit("user_connection_request", data);
     } else {
       alert("Please enter a username.");
@@ -340,6 +340,7 @@ $(function () {
    * Hide all DOM elements which may need to be hidden during certain game phases within the same round
    */
   function hideAllRoundComponents() {
-    $(".game-round-acronym-description, #game-round-description-container, #game-round-voting-container, #game-round-tally-container, #game-over-container").hide();
+    $(".game-round-acronym-description, #game-round-description-container, #game-round-voting-container, " +
+      "#game-round-tally-container, #game-over-container").hide();
   }
 });
