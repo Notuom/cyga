@@ -35,7 +35,8 @@ $(function () {
     acronymEditPanelVisible(true);
   });
 
-  $('#cancel-acronym-changes').on('click', function() {
+  $('#cancel-acronym-changes').on('click', function(e) {
+    e.preventDefault();
     clearAcronymChanges();
     acronymEditPanelVisible(false);
   });

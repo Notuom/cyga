@@ -14,13 +14,15 @@ block content
                     tr
                         th Number
                         th Player
-                        th Score
+                        th Average Score
+                        th Total Score
                 tbody
                 - var count = 1
                     each player in top5
                         tr
                             td !{count++}
                             td !{player.username}
+                            td !{player.average}
                             td !{player.total}
 
         h3 Your game for the last 7 days

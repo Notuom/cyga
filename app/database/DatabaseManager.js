@@ -228,7 +228,13 @@ DatabaseManager.prototype.getAllGamePlayedByUserID = function getAllGamePlayedBy
  */
 DatabaseManager.prototype.getTop5BestPlayer = function getTop5BestPlayer() {
   var deferred = Q.defer();
-  query('SELECT u.username, SUM(gu.score) as total  FROM log515_cyga.users u INNER JOIN log515_cyga.game_users gu ON (u.userid = gu.userid) GROUP BY u.username ORDER BY total DESC LIMIT 5', function(err, result) {
+  query('SELECT u.username, ' +
+    'round(AVG(gu.score),2) AS average,' +
+    'SUM(gu.score) as total  ' +
+    'FROM log515_cyga.users u ' +
+    'INNER JOIN log515_cyga.game_users gu ON (u.userid = gu.userid) ' +
+    'GROUP BY u.username ' +
+    'ORDER BY total DESC LIMIT 5', function(err, result) {
     if (err) {
       //throw err;
       console.log(err);
