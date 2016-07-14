@@ -114,7 +114,7 @@ Room.prototype.acronym = null;
 
 /**
  * Timeout object when waiting for player descriptions
- * @type number I think?
+ * @type number
  */
 Room.prototype.timeout = null;
 

@@ -2,27 +2,27 @@ $(function () {
   var socket = io();
   var username = false;
   var answer = "";
-  var updates= [];
+  var updates = [];
 
   //Save the changes made in the DB
-  $('#update-acronyms').on('click', function() {
+  $('#update-acronyms').on('click', function () {
     socket.emit('update_acronyms', updates);
     $('#reload-page-form').submit();
   });
   //Delete an acronym from the database
-  $('.delete-acronym').on('click', function() {
+  $('.delete-acronym').on('click', function () {
     $row = $(this).parents('tr');
     id = $row.attr('id');
     $row.addClass('deleted');
     updates.push(['DELETE', id]);
   });
   //Add a new acronym
-  $('#add-acronym').on('click', function() {
+  $('#add-acronym').on('click', function () {
     $('#edit-acronym-action').val('insert');
     acronymEditPanelVisible(true);
   });
   //Update an acronym from the database
-  $('.edit-acronym').on('click', function() {
+  $('.edit-acronym').on('click', function () {
     $this = $(this);
     $parentRow = $this.parents('tr');
     id = $parentRow.attr('id');
@@ -36,27 +36,27 @@ $(function () {
     acronymEditPanelVisible(true);
   });
   //Cancel changes made in the acronym edition panel
-  $('#cancel-acronym-changes').on('click', function(e) {
+  $('#cancel-acronym-changes').on('click', function (e) {
     e.preventDefault();
     clearAcronymChanges();
     acronymEditPanelVisible(false);
   });
 
-  $('#acronym-changes-form').submit(function(event) {
+  $('#acronym-changes-form').submit(function (event) {
     event.preventDefault();
     definition = $('#edit-definition-input').val().toLowerCase().trim();
     acronym = $('#edit-acronym-input').val().toUpperCase().trim();
 
     /* un des champs non remplis? */
-    if(definition == '' || acronym == '') {
+    if (definition == '' || acronym == '') {
       alert('Please fill all fields.');
       return;
     }
 
-    if($('#edit-acronym-action').val() == 'insert') {
+    if ($('#edit-acronym-action').val() == 'insert') {
       updates.push(['INSERT', acronym, definition]);
       insertInTable(acronym, definition);
-    }else if($('#edit-acronym-action').val() == 'edit') {
+    } else if ($('#edit-acronym-action').val() == 'edit') {
       id = $('#edit-acronym-id').val();
       $('#edit-acronym-id').val('');
       updates.push(['UPDATE', id, definition]);
@@ -73,13 +73,13 @@ $(function () {
  * @param show true: show panel.
  */
 function acronymEditPanelVisible(show) {
-  if($('#edit-acronym-action').val() == 'insert') {
+  if ($('#edit-acronym-action').val() == 'insert') {
     clearAcronymChanges();
     $('#acronym-edit-panel .panel-heading').html('Add an acronym');
-  }else if($('#edit-acronym-action').val() == 'edit')
+  } else if ($('#edit-acronym-action').val() == 'edit')
     $('#acronym-edit-panel .panel-heading').html('Modify an acronym');
 
-  if(show)
+  if (show)
     $('#acronym-edit-panel').addClass('show');
   else
     $('#acronym-edit-panel').removeClass('show');

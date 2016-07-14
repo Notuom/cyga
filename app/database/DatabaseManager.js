@@ -8,7 +8,7 @@ pg.defaults.ssl = true;
 var config = require(__base + 'config');
 var Acronym = require(__base + 'game/Acronym');
 
-query.connectionParameters =  config.databaseUrl;
+query.connectionParameters = config.databaseUrl;
 /*
  * Public methods
  */
@@ -126,7 +126,7 @@ DatabaseManager.prototype.deleteAcronyms = function deleteAcronyms(acronyms, cal
  */
 DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
   var deferred = Q.defer();
-  query.first('SELECT username FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
+  query.first('SELECT username FROM log515_cyga.users WHERE username LIKE $1', username, function (err, result) {
     deferred.resolve(typeof(result) !== "undefined");
   });
   return deferred.promise;
@@ -138,7 +138,7 @@ DatabaseManager.prototype.isUsernameTaken = function isUsernameTaken(username) {
  */
 DatabaseManager.prototype.insertNewUser = function insertNewUser(user) {
   var deferred = Q.defer();
-  query('INSERT INTO log515_cyga.users (username, password, usertype) VALUES ($1, $2, $3) RETURNING userid', [user.username, user.password, user.type], function(err, result) {
+  query('INSERT INTO log515_cyga.users (username, password, usertype) VALUES ($1, $2, $3) RETURNING userid', [user.username, user.password, user.type], function (err, result) {
     if (err) {
       throw err;
     } else {
@@ -156,7 +156,7 @@ DatabaseManager.prototype.insertNewUser = function insertNewUser(user) {
  */
 DatabaseManager.prototype.getUserByUsername = function getUserByUsername(username) {
   var deferred = Q.defer();
-  query.first('SELECT userid, username, password, usertype as type FROM log515_cyga.users WHERE username LIKE $1', username, function(err, result) {
+  query.first('SELECT userid, username, password, usertype as type FROM log515_cyga.users WHERE username LIKE $1', username, function (err, result) {
     if (err) {
       //throw err;
       console.log(err);
@@ -178,7 +178,7 @@ DatabaseManager.prototype.getUserByUsername = function getUserByUsername(usernam
  */
 DatabaseManager.prototype.createNewGameID = function createNewGameID() {
   var deferred = Q.defer();
-  query('INSERT INTO log515_cyga.game DEFAULT VALUES RETURNING gameid', function(err, result) {
+  query('INSERT INTO log515_cyga.game DEFAULT VALUES RETURNING gameid', function (err, result) {
     if (err) {
       //throw err;
       console.log(err);
@@ -200,7 +200,7 @@ DatabaseManager.prototype.createNewGameID = function createNewGameID() {
 DatabaseManager.prototype.insertScoreByUsernameAndGameID = function insertScoreByUsernameAndGameID(gameid, username, score) {
   console.log(gameid, username, score);
   this.getUserByUsername(username)
-    .then(function(user){
+    .then(function (user) {
       console.log(user);
       if (user) {
         query('INSERT INTO log515_cyga.game_users (score, gameid, userid) VALUES ($1, $2, $3)', [score, gameid, user.userid], function (err, result) {
@@ -210,7 +210,7 @@ DatabaseManager.prototype.insertScoreByUsernameAndGameID = function insertScoreB
           }
         });
       }
-  });
+    });
 };
 
 /**
@@ -221,7 +221,7 @@ DatabaseManager.prototype.insertScoreByUsernameAndGameID = function insertScoreB
 DatabaseManager.prototype.getAllGamePlayedByUserID = function getAllGamePlayedByUserID(userid) {
   var deferred = Q.defer();
   console.log(userid);
-  query('SELECT TO_CHAR(g.gamedate,\'DD Mon YYYY\') as gamedate, gu.score  FROM log515_cyga.game g INNER JOIN log515_cyga.game_users gu ON (g.gameid = gu.gameid) WHERE gu.userid = '+userid+' AND g.gamedate >= NOW() - INTERVAL \'7 days\' ORDER BY g.gamedate DESC', function(err, result) {
+  query('SELECT TO_CHAR(g.gamedate,\'DD Mon YYYY\') as gamedate, gu.score  FROM log515_cyga.game g INNER JOIN log515_cyga.game_users gu ON (g.gameid = gu.gameid) WHERE gu.userid = ' + userid + ' AND g.gamedate >= NOW() - INTERVAL \'7 days\' ORDER BY g.gamedate DESC', function (err, result) {
     if (err) {
       //throw err;
       console.log(err);
@@ -252,7 +252,7 @@ DatabaseManager.prototype.getTop5BestPlayer = function getTop5BestPlayer() {
     'FROM log515_cyga.users u ' +
     'INNER JOIN log515_cyga.game_users gu ON (u.userid = gu.userid) ' +
     'GROUP BY u.username ' +
-    'ORDER BY total DESC LIMIT 5', function(err, result) {
+    'ORDER BY total DESC LIMIT 5', function (err, result) {
     if (err) {
       //throw err;
       console.log(err);

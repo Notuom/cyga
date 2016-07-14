@@ -2,6 +2,7 @@
 h1 i {
   font-size: 40px;
 }
+
 .glyphicon {
   margin-right: 5px;
 }
@@ -54,8 +55,8 @@ h1 i {
 
 /* Login Css */
 #login, #signup {
-  width : 780px;
-  margin : 0 auto;
+  width: 780px;
+  margin: 0 auto;
 }
 
 /* Account Css */
