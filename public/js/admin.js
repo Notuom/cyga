@@ -42,10 +42,16 @@ $(function () {
 
   $('#acronym-changes-form').submit(function(event) {
     event.preventDefault();
-    definition = $('#edit-definition-input').val().toLowerCase();
+    definition = $('#edit-definition-input').val().toLowerCase().trim();
+    acronym = $('#edit-acronym-input').val().toUpperCase().trim();
+
+    /* un des champs non remplis? */
+    if(definition == '' || acronym == '') {
+      alert('Please fill all fields.');
+      return;
+    }
 
     if($('#edit-acronym-action').val() == 'insert') {
-      acronym = $('#edit-acronym-input').val().toUpperCase();
       updates.push(['INSERT', acronym, definition]);
       insertInTable(acronym, definition);
     }else if($('#edit-acronym-action').val() == 'edit') {
