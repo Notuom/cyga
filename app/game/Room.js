@@ -234,7 +234,7 @@ Room.prototype.getPlayerDescriptions = function getPlayerDescriptions() {
     // Get player answers in array
     return player.answer;
   }).filter(function (answer, index, self) {
-    // Remove duplicates TODO might not be necessary if we don't let people have the same answer
+    // Remove duplicates and null answers from the array
     return answer !== null && index == self.indexOf(answer);
   });
 };
