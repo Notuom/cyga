@@ -38,7 +38,10 @@ DatabaseManager.prototype.getRandomAcronyms = function getRandomAcronyms(size, c
     }
   });
 };
-
+/**
+ * Get an array of all the Acronym objects and return it through the callback parameter.
+ * @param callback callback with an "acronyms" parameter which is an array of the Acronym objects
+ */
 DatabaseManager.prototype.getAcronyms = function getAcronyms(callback) {
   var client = new pg.Client(config.databaseUrl);
   client.connect();
@@ -55,6 +58,11 @@ DatabaseManager.prototype.getAcronyms = function getAcronyms(callback) {
   });
 };
 
+/**
+ * Insert the new Acronyms in the DB
+ * @param acronyms Array of the new acronyms and their definitions
+ * @param callback To let the user do synchronized operations
+ */
 DatabaseManager.prototype.insertAcronyms = function insertAcronyms(acronyms, callback) {
   var client = new pg.Client(config.databaseUrl);
   client.connect();
@@ -70,6 +78,11 @@ DatabaseManager.prototype.insertAcronyms = function insertAcronyms(acronyms, cal
   });
 };
 
+/**
+ * Update the modified Acronym in the DB
+ * @param acronyms Array of the acronyms' id and their modified definitions
+ * @param callback To let the user do synchronized operations
+ */
 DatabaseManager.prototype.updateAcronyms = function updateAcronyms(acronyms, callback) {
   var client = new pg.Client(config.databaseUrl);
   client.connect();
@@ -85,6 +98,11 @@ DatabaseManager.prototype.updateAcronyms = function updateAcronyms(acronyms, cal
   });
 };
 
+/**
+ * Delete the Acronym in the DB
+ * @param acronyms Array of the acronyms' id
+ * @param callback To let the user do synchronized operations
+ */
 DatabaseManager.prototype.deleteAcronyms = function deleteAcronyms(acronyms, callback) {
   var client = new pg.Client(config.databaseUrl);
   client.connect();
