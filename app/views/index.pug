@@ -32,8 +32,7 @@ block content
       if user
         h2 Create a room
         label(class='control-label', for='room-create-turns') Number of turns
-        // TODO remettre min. 10 tours, je fais des tests avec 3
-        input(class='form-control', type='number', id='room-create-turns', min='1', max='50', value='1')
+        input(class='form-control', type='number', id='room-create-turns', min='10', max='50', value='10')
         button(type='submit', id='room-create', name='room-create', class='btn btn-success')
           i(class='glyphicon glyphicon-plus')
           | Create room
@@ -46,6 +45,7 @@ block content
     // Waiting room
     form#room-waiting-form(class='form game-panel', action='/', method='post', hidden)
       h2 Room
+        | #
         span.room-code {{code}}
       table(class='table table-striped')
         thead
@@ -59,8 +59,10 @@ block content
     // Game round panel
     form(action='/', method='post', id='game-round-form', class='game-panel', hidden)
       h2 Room
+        | #
         span.room-code code
       h3 Round
+        |
         span.game-round-round round
         | /
         span.game-round-turns turns
