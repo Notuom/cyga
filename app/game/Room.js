@@ -123,23 +123,28 @@ Room.prototype.timeout = null;
  */
 /**
  * Add a user to the room by username
- * @param username of the player
+ * @param username {string} username of the player to add
  */
 Room.prototype.addPlayer = function addPlayer(username) {
-  this.players.push(username);
+  if (!this.playerExists(username)) {
+    this.players.push(username);
+  }
 };
 
 /**
  * Remove a user from the room
- * @param username
+ * @param username {string} username to remove from room
  */
 Room.prototype.removePlayer = function removePlayer(username) {
-  this.players.splice(this.players.indexOf(username), 1);
+  var playerIndex = this.players.indexOf(username);
+  if (playerIndex > -1) {
+    this.players.splice(playerIndex, 1);
+  }
 };
 
 /**
  * Returns true if a player with the specified username exists in the room.
- * @param username
+ * @param username {string} username to check against
  * @returns {boolean}
  */
 Room.prototype.playerExists = function playerExists(username) {
@@ -166,7 +171,7 @@ Room.prototype.hasMaxPlayers = function hasMaxPlayers() {
 Room.prototype.nextRound = function nextRound() {
   this.resetRound();
   this.round++;
-  this.acronym = this.acronyms.pop();
+  this.acronym = this.acronyms.shift();
 };
 
 /**

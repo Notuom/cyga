@@ -62,7 +62,7 @@ block content
         |  #
         span.room-code code
       h3 Round
-        | 
+        |&nbsp;
         span.game-round-round round
         | /
         span.game-round-turns turns
@@ -107,8 +107,8 @@ block content
       .panel-heading
         h3 Disconnected
       .panel-body
-        You have been disconnected from the server.
-          a(href='/') Click here
-        to start over.
+        | You have been disconnected from the server.&nbsp;
+        a(href='/') Click here
+        |  to start over.
     #user(hidden)
       input(type='hidden', name='username', value= user ? user.username : 'none')

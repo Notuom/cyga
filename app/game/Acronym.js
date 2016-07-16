@@ -13,7 +13,7 @@ var Acronym = function Acronym(id, name, description) {
  */
 /**
  * Acronym id
- * @type {string}
+ * @type {number}
  */
 Acronym.prototype.id = "";
 
