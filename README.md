@@ -1,43 +1,61 @@
-# LOG515 - CYGA (Can You Guess the Acronym)
+# CYGA (Can You Guess the Acronym)
 
-CYGA requiert [Node.js](https://nodejs.org/). Installez Node.js et npm (fourni avec Node.js) sur votre système avant de procéder.
+## How to play
 
-## Installation des dépendances
+CYGA is a browser game for up to 8 players. The goal of the game is to come up with the best meaning for acronyms. Each turn, an acronym is shown. Players must submit their meaning and submit it. Then, players must vote for another player's acronym - it could be the one that makes the most sense or the funniest one! After a set number of turns, the game ends and the player with the most votes wins.
 
-Pour installer les dépendances `npm` de l'application :
+A demo is available on a free Heroku-hosted server: [log515-cyga.herokuapp.com](https://log515-cyga.herokuapp.com). In order to start a game, one of the players must create an account (no verification needed) and create a new room. Then, players can join the room and play.
+
+## Credits
+
+This game was made as a school project for the Software Engineering Project Management class at [École de technologie supérieure](https://www.etsmtl.ca/) in 2016.
+
+Contributors (alphabetical order):
+
+* Guillame Chevalier
+* Kevin Jacques
+* Olivier Lalonde
+* Karl Thibault
+
+## Technology
+
+CYGA is built on [Node.js](https://nodejs.org/) and uses a PostgreSQL database in order to store acronyms, accounts and scores.
+
+### Installing and running
+
+First, install dependencies:
 
 ```
 npm install
 ```
 
-Cette tâche doit être faite avant toute autre manipulation.
-
-## Exécution de l'application
-
-Pour exécuter l'application :
+Then, start the app:
 
 ```
 npm start
 ```
 
-## Génération de la documentation
+You should configure an environment variable with a valid PostgreSQL connection string.
 
-Pour générer la documentation avec JSDoc :
+### Generating documentation
+
+You can generate JSDoc for the project:
 
 ```
 npm run doc
 ```
 
-La documentation sera disponible via le fichier out/index.html.
+Documentation will be available in `out/index.html`.
 
-## Tests unitaires
+### Unit tests
 
-Pour exécuter les tests unitaires avec Mocha :
+You can run unit tests (uses Mocha):
 
 ```
 npm test
 ```
 
-## Notes
+### Database setup
 
-* Pour exécuter l'application, une connexion internet doit être disponible pour que l'application puisse se connecter à la base de données PostgreSQL sur Heroku. Sinon, une source PostgreSQL doit être fournie dans le fichier app/config.js.
+* Run migrationScript.sql on your empty PostgreSQL database
+* Create an environment variable named `DATABASE_URL` containing the full connection string (i.e. `postgres://...`)
